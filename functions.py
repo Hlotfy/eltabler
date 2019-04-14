@@ -14,7 +14,7 @@ def getConn(db):
                            passwd='',
                            db=db)
     return conn
-    
+
 #### QUESTION: DO WE NEED THIS? (Scott seems like he didn't check if the uid is in the db)
 def login(conn,uid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
@@ -30,7 +30,7 @@ def getAllOutstandingBalance(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from user where balanceOwed > 0')
     return curs.fetchall()
-    
+
 def getAllUsers(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from user')
@@ -48,14 +48,18 @@ def searchUser(conn,form):
     form = '%' + form + '%'
     curs.execute('select * from user where username like %s',(form,))
     return curs.fetchall()
-    
+
 def addOrder(conn,form):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('insert into orders(dt,username,miid) values(now(),%s,(select miid from menuItem where name=%s))',(form['username'],form['menuItem']))
     conn.commit()
     return updateUserBalance(conn,form['username'])
 
+# Gets a user's balance, specified by their username
+def getUserBalance(conn,user):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select balanceOwed from user where username = %s', (user))
+    return curs.fetchall()
+
 if __name__ == '__main__':
     conn = getConn('tabtracker')
-    
-   
