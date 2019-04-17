@@ -1,0 +1,27 @@
+miid,name,kind,price,instock
+0,Yoohoo,drink,1,1
+0,San Pellegrino,drink,1.25,1
+0,Capri Sun,drink,0.75,1
+0,Candy,candy,0.25,1
+0,Full Size Chips,snack,1,1
+0,Small Chips,snack,0.75,1
+0,Yogurt,snack,2,1
+0,Kashi bar,snack,1,1
+0,Gum,candy,1,1
+0,ABCD,sandwich,5.5,1
+0,LGBLT,sandwich,4.5,1
+0,Bread Serious,sandwich,6.5,1
+0,The Bro-wich,sandwich,5,1
+0,The Consensu-el,sandwich,2,1
+0,El Table Club,sandwich,7,1
+0,The Green Monstah,sandwich,5,1
+0,Italiano,sandwich,6,1
+0,Spice Jam,sandwich,4.5,1
+0,Le Petit Francais,sandwich,6,1
+0,Murphys Law,sandwich,4.5,1
+0,Love Snack,sandwich,3.5,1
+0,Sharp n Sweet,sandwich,4.5,1
+0,cheese sandwich,sandwich,3.5,1
+0,meat sandwich,sandwich,4.5,1
+0,meat cheese sandwich,sandwich,5,1
+0,toast,base,1.00,1

@@ -1,47 +1,47 @@
 iid,name,kind,price,instock
-,sourdough,bread,0,1
-,wheat,bread,0,1
-,multigrain,bread,0,1
-,rye,bread,0,1
-,rosemary garlic ,bread,0,1
-,bagel,bread,0.50,1
-,croissant,bread,0.50,1
-,provolone,cheese,0,1
-,cheddar,cheese,0,1
-,muenster,cheese,0,1
-,swiss,cheese,0,1
-,goat,cheese,0.50,1
-,brie,cheese,0.50,1
-,bacon,meat,0,1
-,ham,meat,0,1
-,turkey,meat,0,1
-,greens,extra,0,1
-,tomato,extra,0,1
-,mayonnaise,extra,0,1
-,mustard,extra,0,1
-,dijon,extra,0,1
-,hot sauce,extra,0,1
-,sriracha,extra,0,1
-,butter,extra,0,1
-,honey,extra,0,1
-,sun-dried tomatoes,extra,0.50,1
-,roasted red peppers,extra,0.50,1
-,pesto,extra,0.50,1
-,artichoke tapenade,extra,0.50,1
-,olive tapenade,extra,0.50,1
-,apple,extra,0.50,1
-,fig jam,extra,0.50,1
-,strawberry jam,extra,0.50,1
-,peanut butter,extra,0.50,1
-,cream cheese,extra,0.50,1
-,hummus,extra,0.50,1
-,pepper jelly,extra,0.50,1
-,walnuts,extra,0.50,1
-,cranberry sauce,extra,0.50,1
-,avocado,extra,1.00,1
-,nutella,extra,1.00,1
-,cookie butter,extra,1.00,1
-,cheese sandwich,base,3.50,1
-,meat sandwich,base,4.50,1
-,meat cheese sandwich,base,5.00,1
-,toast,base,1.00,1
+0,sourdough,bread,0,1
+0,wheat,bread,0,1
+0,multigrain,bread,0,1
+0,rye,bread,0,1
+0,rosemary garlic,bread,0,1
+0,bagel,bread,0.5,1
+0,croissant,bread,0.5,1
+0,provolone,cheese,0,1
+0,cheddar,cheese,0,1
+0,muenster,cheese,0,1
+0,swiss,cheese,0,1
+0,goat,cheese,0.5,1
+0,brie,cheese,0.5,1
+0,bacon,meat,0,1
+0,ham,meat,0,1
+0,turkey,meat,0,1
+0,greens,extra,0,1
+0,tomato,extra,0,1
+0,mayonnaise,extra,0,1
+0,mustard,extra,0,1
+0,dijon,extra,0,1
+0,hot sauce,extra,0,1
+0,sriracha,extra,0,1
+0,butter,extra,0,1
+0,honey,extra,0,1
+0,sun-dried tomatoes,extra,0.5,1
+0,roasted red peppers,extra,0.5,1
+0,pesto,extra,0.5,1
+0,artichoke tapenade,extra,0.5,1
+0,olive tapenade,extra,0.5,1
+0,apple,extra,0.5,1
+0,fig jam,extra,0.5,1
+0,strawberry jam,extra,0.5,1
+0,peanut butter,extra,0.5,1
+0,cream cheese,extra,0.5,1
+0,hummus,extra,0.5,1
+0,pepper jelly,extra,0.5,1
+0,walnuts,extra,0.5,1
+0,cranberry sauce,extra,0.5,1
+0,avocado,extra,1,1
+0,nutella,extra,1,1
+0,cookie butter,extra,1,1
+0,cheese sandwich,base,3.5,1
+0,meat sandwich,base,4.5,1
+0,meat cheese sandwich,base,5,1
+0,toast,base,1,1
