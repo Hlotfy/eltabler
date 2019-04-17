@@ -38,8 +38,8 @@ git stash clear   --- Remove all stashed entries
 -- Push & Pull Requests --
 --------------------------
 git push origin --delete [branchName]   --- Delete a remote branch
-git push origin [branch name]   --- push changes to [branch name]
-git push origin [branch name]   --- Push a branch to your remote repository
+git push origin [branch name]   --- Push changes to [branch name]
+git push origin [branch name]:master    --- Push changes from [branch name] to master
 git push -u origin [branch name]    --- Push changes to remote repository (and remember the branch)
 git push    ---	Push changes to remote repository (remembered branch)
 git push origin --delete [branch name]    --- Delete a remote branch
