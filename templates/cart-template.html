@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{%block head_stuff %}
+<style>
+.item { display: inline-block; width: 30%; }
+</style>
+{% endblock %}
+
+{%block main_content %}
+<h1>Welcome to Our Place</h1>
+
+<p>Where thirsty people drink.
+
+{% for item in ['beer','wine','soda'] %}
+<div class="item">
+<p><img src="{{ url_for('static', filename=item+'.jpg') }}" width=200 alt="{{item}}">
+  <form method=post action="">
+    <input type=hidden name="itemid" value="{{item}}">
+    <input type=submit name="submit" value="add to cart">
+ </form>
+</div>
+{% endfor %}
+
+{% if cartContents: %}
+       <p>Your cart contains:</p>
+       <ul>
+       {% for item in cart %}
+           <li>{{cart[item]}} glasses of {{item}}</li>
+       {% endfor %}           
+       </ul>
+{% endif %}
+
+<p>
+  <form method=post action="">
+    <input type=submit name=submit value="Show Cart">
+ </form>
+  <form method=post action="{{url_for('clearCart')}}">
+    <input type=submit name=submit value="Clear Cart">
+ </form>
+ 
+<!-- another way to do buttons -->
+ <form method="post" action="{{url_for('iam21')}}"><button type="submit">I am 21</button></form>
+{% endblock %}

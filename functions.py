@@ -15,7 +15,6 @@ def getConn(db):
                            db=db)
     return conn
 
-#### QUESTION: DO WE NEED THIS? (Scott seems like he didn't check if the uid is in the db)
 def login(conn,uid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from staff where uid=%s',(uid,))
@@ -104,4 +103,4 @@ if __name__ == '__main__':
     items = getOrderItems(conn,"hlotfy")
     for item in items:
         print item
-    
+
