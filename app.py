@@ -14,10 +14,10 @@ app.secret_key = 'asdflsgflawiewurhe'
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 conn = functions.getConn('tabtracker')
 
+
 @app.route('/')
 def index():
     return redirect( url_for('menu') )
-    
 
 @app.route('/tabs/')
 def tabs():
@@ -90,6 +90,36 @@ def clearCart():
     flash('not yet implemented')
     return redirect(url_for('session_cart'))
 
+
+@app.route('/<username>/payment/', methods=['GET','POST'])
+def payment(username):
+    if request.method == 'GET':
+        return render_template('payment_page.html')
+        
+    else: #method must be 'POST'
+        #get the payment amount and method
+        amount = request.form.get('amount')
+        method = request.form.get('method')
+        
+        try:
+            # convert to float to type check and to insert into database
+            amount = float(amount)
+        except ValueError:
+            flash("Please enter an number.")
+            return render_template("payment_page.html")
+            
+        # make sure the employee enters a payment method
+        if method == None:
+            flash("Please select a payment method.")
+            return render_template("payment_page.html")
+            
+        #calculates the user's new balance and updates the database
+        newBalance = functions.makePayment(conn,username,method,amount)
+        name = functions.getUser(conn,username)['name']
+        flash(name + " made a payment of $" + str(amount) + " using " + method + ". Their new balance is $" + str(newBalance) + ".")
+        payments = functions.getRecentPayments(conn,username)
+        return render_template('payment_page.html',payments=payments)
+    
 @app.route('/addToTab', methods=['POST'])
 def addToTab():
     flash('not yet implemented')
