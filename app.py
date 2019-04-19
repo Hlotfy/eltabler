@@ -17,7 +17,7 @@ conn = functions.getConn('tabtracker')
 
 @app.route('/')
 def index():
-    return redirect( url_for('menu') )
+    return render_template('index.html')
 
 @app.route('/tabs/')
 def tabs():
@@ -25,7 +25,7 @@ def tabs():
     return render_template('userTabs.html', users=users)
     
 @app.route('/order/', methods = ['POST', 'GET'])
-def menuItems():
+def order():
     items = functions.getAllMenuItems(conn)
     return render_template('order_form.html', items=items)
     
@@ -59,12 +59,12 @@ def recent_orders(username):
     user = functions.getUser(conn,username)
     return render_template('recent_orders.html',orders=orders, items=items, user=user)
 
-@app.route('/cart')
+@app.route('/cart/')
 def cart():
     users = functions.getAllUsers(conn)
     return render_template('shoppingCart.html', users=users)
 
-@app.route('/session/cart', methods=['GET','POST'])
+@app.route('/session/cart/', methods=['GET','POST'])
 def session_cart():
     users = functions.getAllUsers(conn)
     cart = session.get('cart', {'beer':0, 'wine':0, 'soda':0}) # use these defaults if cart isn't in session
@@ -85,16 +85,18 @@ def session_cart():
                            cart=cart,
                            users = users)
 
-@app.route('/clearCart', methods=['POST'])
+@app.route('/clearCart/', methods=['POST'])
 def clearCart():
     flash('not yet implemented')
     return redirect(url_for('session_cart'))
 
 
 @app.route('/<username>/payment/', methods=['GET','POST'])
+# awesome! idea - maybe we use ajax for this in the alpha/beta version?
 def payment(username):
     if request.method == 'GET':
-        return render_template('payment_page.html')
+        payments = functions.getRecentPayments(conn,username)
+        return render_template('payment_page.html', payments=payments)
         
     else: #method must be 'POST'
         #get the payment amount and method
@@ -120,7 +122,8 @@ def payment(username):
         payments = functions.getRecentPayments(conn,username)
         return render_template('payment_page.html',payments=payments)
     
-@app.route('/addToTab', methods=['POST'])
+@app.route('/addToTab/', methods=['POST'])
+# should we maybe just redirect to my recent_payments page?
 def addToTab():
     flash('not yet implemented')
     return redirect(url_for('session_cart'))

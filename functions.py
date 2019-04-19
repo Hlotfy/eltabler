@@ -46,7 +46,7 @@ def getUserBalance(conn,user):
 # Gets all menu items
 def getAllMenuItems(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select * from menuItems;')
+    curs.execute('select * from menuItem;')
     return curs.fetchall()
 
 # Gets the ingredients of a given menu item
@@ -59,10 +59,10 @@ def getIngredients(conn, menuItemId):
 def makePayment(conn,username,method,amount):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     #update the user's balance owed
-    curs.execute('select balanceOwed from user where username= %s', (username,))
+    curs.execute('select balanceOwed from user where username = %s', (username,))
     currentBalance = curs.fetchone()
     newBalance = currentBalance['balanceOwed'] - amount
-    curs.execute('update user set balanceOwed = %s', (newBalance,))
+    curs.execute('update user set balanceOwed = %s where username = %s', (newBalance,username))
     #update their payments
     curs.execute('insert into payments(username,dt,method,amount) values (%s,now(),%s,%s)', (username,method,amount,))
     conn.commit()

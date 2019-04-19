@@ -1,97 +1,15 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-.accordion {
-  background-color: white;
-  color: grey;
-  cursor: pointer;
-  padding: 18px;
-  margin-left:1em;
-  margin-right:1em;
-  width: 80%;
-  border: 5px solid pink;
-  text-align: left;
-  outline: none;
-  font-size: 15px;
-  transition: 0.4s;
-}
+{% extends "index.html" %}
 
-div {
-  color: red;
-  font-weight: bold;
-}
-.panel {
-  margin-left:1em;
-  margin-right:1em;
-  width: 80%;
-  text-align: center;
-  background-color: lavender;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease-out;
-}
-
-.center {
-  margin: auto;
-  width: 50%;
-  padding: 10px;
-}
-
-th {
-  text-align: right;
-  margin-left: 1em;
-  margin-right: 1em;
-  padding-left: 50px;
-  padding-right: 20px;
-}
-
-td {
-  text-align: right;
-  margin: 1em;
-  padding-left: 50px;
-  padding-right: 20px;
-}
-
-.btn-group button {
-  background-color: #4CAF50; /* Green background */
-  border: 1px solid green; /* Green border */
-  color: white; /* White text */
-  padding: 10px 24px; /* Some padding */
-  cursor: pointer; /* Pointer/hand icon */
-  width: 50%; /* Set a width if needed */
-  display: block; /* Make the buttons appear below each other */
-}
-
-.btn-group button:not(:last-child) {
-  border-bottom: none; /* Prevent double borders */
-}
-
-/* Add a background color on hover */
-.btn-group button:hover {
-  background-color: #3e8e41;
-}
-</style>
-</head>
-<body>
-  
-   {% with messages = get_flashed_messages() %}
-            {% if messages %}
-                <div id="messages" class="center">
-                {% for msg in messages %}
-                    <p>{{msg}}</p>
-                {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}    
-        
-<form action="/hlotfy/recent_orders/" method="POST">
-    {% for item in items %}
-    <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}</option>
-    {% endfor %}
-  <input type="submit">
-</form>
-
-</body>
-</html>
+ 
+  {% block content %}
+  <h1>Please Select 1 or More Menu Items to Add to Order</h1>
+  <div class="main">
+      <form action="/hlotfy/recent_orders/" method="POST">
+          {% for item in items %}
+            <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}</option>
+          {% endfor %}
+          <input type="submit">
+      </form>
+      </div>
+  {% endblock %}

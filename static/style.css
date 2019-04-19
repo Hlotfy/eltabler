@@ -1,0 +1,106 @@
+body {margin:0;}
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: grey;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover:not(.active) {
+  background-color: #111;
+}
+
+.active {
+  background-color: plum;
+}
+
+.btn-group button {
+  background-color: #F4D1FF; /* Green background */
+  border: 1px solid #DCDCDC; /* Green border */
+  color: brown; /* White text */
+  padding: 10px 24px; /* Some padding */
+  cursor: pointer; /* Pointer/hand icon */
+  width: 50%; /* Set a width if needed */
+  display: block; /* Make the buttons appear below each other */
+}
+
+.btn-group button:not(:last-child) {
+  border-bottom: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.btn-group button:hover {
+  background-color: #9DF9E5;
+}
+
+.accordion {
+  background-color: white;
+  color: grey;
+  cursor: pointer;
+  padding: 18px;
+  margin-left:1em;
+  margin-right:1em;
+  width: 80%;
+  border: 5px solid pink;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  transition: 0.4s;
+}
+
+
+.panel {
+  margin-left:1em;
+  margin-right:1em;
+  width: 80%;
+  text-align: center;
+  background-color: lavender;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+
+.center {
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+  padding-top: 5ex;
+}
+
+h1 {
+  padding-top: 5ex;
+}
+
+th {
+  text-align: right;
+  margin-left: 1em;
+  margin-right: 1em;
+  padding-left: 50px;
+  padding-right: 20px;
+}
+
+td {
+  text-align: right;
+  margin: 1em;
+  padding-left: 50px;
+  padding-right: 20px;
+}
+
+#messages { color: red; font-weight: bold; }
