@@ -109,8 +109,8 @@ create table payments (
     primary key (pid)
 );
 
-select * from menuItem;
-select * from ingredient;
+-- select * from menuItem;
+-- select * from ingredient;
 
 insert into user(name, username, balanceOwed)
 values ("Hala Lotfy", "hlotfy", 0), 
@@ -127,7 +127,7 @@ insert into orders(dt,username,miid) values(now(),"acamacho",(select miid from m
 insert into orders(dt,username,miid) values(now(),"elennonj",(select miid from menuItem where name="Candy"));
 insert into orders(dt,username,miid) values(now(),"mkashyap",(select miid from menuItem where name="Yogurt"));
 
-select * from orders;
+-- select * from orders;
 
 insert into orders(dt,username,miid) values(now(),'lorthsmi',(select miid from menuItem where name="Capri Sun"));
 
@@ -138,16 +138,21 @@ insert into payments (username, dt, method, amount) values ("hlotfy", now(), "ve
 
 update user, orders, menuItem set user.balanceOwed = (select sum(menuItem.price) from orders inner join menuItem on orders.miid = menuItem.miid where orders.username=user.username) where user.username = orders.username;
 
-select * from user where balanceOwed > 0;
+-- select * from user where balanceOwed > 0;
 
 update user, payments set balanceOwed = balanceOwed - (select sum(payments.amount) from payments where payments.username = user.username) where user.username = payments.username;
 
-select * from recipe;
+-- select * from recipe;
 
-select menuItem.name, menuItem.price, sum(ingredient.price) as 'ingredients price' from recipe inner join menuItem on recipe.miid = menuItem.miid inner join ingredient on recipe.iid = ingredient.iid group by menuItem.miid order by menuItem.name;  
+-- select menuItem.name, menuItem.price, sum(ingredient.price) as 'ingredients price' from recipe inner join menuItem on recipe.miid = menuItem.miid inner join ingredient on recipe.iid = ingredient.iid group by menuItem.miid order by menuItem.name;  
 
-select recipe.miid, sum(ingredient.price) from recipe inner join ingredient on recipe.iid = ingredient.iid group by recipe.miid;
+-- select recipe.miid, sum(ingredient.price) from recipe inner join ingredient on recipe.iid = ingredient.iid group by recipe.miid;
 
-select user.name, sum(menuItem.price) as 'Tab Balance Owed' from orders inner join user on orders.username=user.username inner join menuItem on orders.miid=menuItem.miid group by orders.username; 
+-- select user.name, sum(menuItem.price) as 'Tab Balance Owed' from orders inner join user on orders.username=user.username inner join menuItem on orders.miid=menuItem.miid group by orders.username; 
 
-select name, balanceOwed from user where balanceOwed > 0;
+-- select name, balanceOwed from user where balanceOwed > 0;
+
+insert into staff(username) values('acamacho');
+insert into staff(username) values('elennonj');
+insert into staff(username) values('hlotfy');
+insert into staff(username) values('mkashyap');
