@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+.accordion {
+  background-color: white;
+  color: grey;
+  cursor: pointer;
+  padding: 18px;
+  margin-left:1em;
+  margin-right:1em;
+  width: 80%;
+  border: 5px solid pink;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  transition: 0.4s;
+}
+
+
+.panel {
+  margin-left:1em;
+  margin-right:1em;
+  width: 80%;
+  text-align: center;
+  background-color: lavender;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+
+.center {
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+}
+
+th {
+  text-align: right;
+  margin-left: 1em;
+  margin-right: 1em;
+  padding-left: 50px;
+  padding-right: 20px;
+}
+
+td {
+  text-align: right;
+  margin: 1em;
+  padding-left: 50px;
+  padding-right: 20px;
+}
+
+
+</style>
+</head>
+<body>
+<section class="center">
+
+<h1>{{user.username}}'s Tab Balance: {{user.balanceOwed}}</h1> 
+
+<h2>Recent Orders</h2>
+<p >Click on the order to see details</p>
+{% for order in orders %}
+<button class="accordion">
+    <table>
+        <tr>
+            <th>{{order.dt}}</th>
+            <th>${{order.total}}</th>
+            <th>{{order.item_num}}</th>
+        </tr>
+    </table>
+</button>
+
+    {% for item in items %}
+<div class="panel">
+    <table>
+         {% if item.oid == order.oid %}
+        <tr>
+            <td>{{item.name}}</td>
+            <td>${{item.item_total}}</td>
+            <td>{{item.quantity}}</td>
+        
+        {% endif %}
+        {% endfor %}
+        </tr>
+
+    </table>
+</div>
+    
+{% endfor %}
+
+</section>
+
+<script>
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.maxHeight){
+      panel.style.maxHeight = null;
+    } else {
+      panel.style.maxHeight = panel.scrollHeight + "px";
+    } 
+  });
+}
+</script>
+
+</body>
+</html>
