@@ -84,9 +84,10 @@ def addOrder(conn,form,username):
     #print(oid)
     for item in form:
         addOrderItems(conn,item,oid)
-    curs.execute('select sum(menuItem.price * orderItem.quantity) as total from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s,(username,);')
+    curs.execute('select sum(menuItem.price * orderItem.quantity) as total from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s and orderItem.oid=%s',(username,oid))
     orderTotal = curs.fetchone()['total']
-    curs.execute('update user set balanceOwed = balanceOwed + orderTotal')
+    print orderTotal
+    curs.execute('update user set balanceOwed = balanceOwed + %s',(orderTotal,))
     conn.commit()
     return getRecentOrders(conn,username)
  
