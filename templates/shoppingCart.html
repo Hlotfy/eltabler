@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{%block head_stuff %}
+<style>
+.item { display: inline-block; width: 30%; }
+</style>
+{% endblock %}
+
+{% block main_content %}
+<div class="shopping-cart">
+ <!-- Title -->
+    <div class="title">
+        <h1> Cart </h1>
+        <h2>Items</h2> 
+    </div>
+    
+    <!-- Product #1 -->
+  <div class="item">
+    <div class="buttons">
+      <span class="delete-btn"></span>
+      <span class="like-btn"></span>
+    </div>
+ 
+    <div class="image">
+      <img src="item-1.png" alt="image of first product here" />
+    </div>
+ 
+    <div class="description">
+      <span>Common Projects</span>
+      <span>Bball High</span>
+      <span>White</span>
+    </div>
+ 
+    <div class="quantity">
+      <button class="plus-btn" type="button" name="button">
+        <img src="plus.svg" alt="" />
+      </button>
+      <input type="text" name="name" value="1">
+      <button class="minus-btn" type="button" name="button">
+        <img src="minus.svg" alt="" />
+      </button>
+    </div>
+ 
+    <div class="total-price">$549</div>
+  </div>
+</div>
+
+
+
+    <ol>
+        <li><a href= "">Green Monsta</a></li>        
+        <li><a href= "">Chai Latte</a></li>      
+    </ol>
+
+{% for item in ['Green Monsta','Chai Latte','Sandwich', 'Drink'] %}
+<div class="item">
+<p>
+    <form method=post action="">
+        <input type=hidden name="itemid" value="{{item}}">
+        <input type=submit name="submit" value="remove from cart">
+    </form>
+    <ul>
+        <li><a href= "">"{{item}}"</a></li>        
+        <!--<li><a href= "">Chai Latte</a></li>      -->
+    </ul>
+</div>
+{% endfor %}
+
+
+{% endblock %}
