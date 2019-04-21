@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+{% extends "index.html" %}
+
+{% block content %}
+
+<div class="main">
+<h1>{{user.username}}'s Tab Balance: {{user.balanceOwed}}</h1> 
+
+<h2>Recent Orders</h2>
+<p>Click on the order to see details</p>
+</div>
+<div class="center">
+{% for order in orders %}
+<button class="accordion">
+    <table>
+        <tr>
+            <th>{{order.dt}}</th>
+            <th>${{order.total}}</th>
+            <th>{{order.item_num}}</th>
+        </tr>
+    </table>
+</button>
+
+    {% for item in items %}
+<div class="panel">
+    <table>
+         {% if item.oid == order.oid %}
+        <tr>
+            <td>{{item.name}}</td>
+            <td>${{item.item_total}}</td>
+            <td>{{item.quantity}}</td>
+        
+        {% endif %}
+        {% endfor %}
+        </tr>
+
+    </table>
+</div>
+    
+{% endfor %}
+</div>
+<script>
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.maxHeight){
+      panel.style.maxHeight = null;
+    } else {
+      panel.style.maxHeight = panel.scrollHeight + "px";
+    } 
+  });
+}
+</script>
+
+{% endblock %}

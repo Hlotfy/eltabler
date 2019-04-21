@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+{% extends "index.html" %}
+
+ 
+  {% block content %}
+  <h1>Please Select 1 or More Menu Items to Add to Order</h1>
+  <div class="main">
+      <form action="/hlotfy/recent_orders/" method="POST">
+          {% for item in items %}
+            <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}</option>
+          {% endfor %}
+          <input type="submit">
+      </form>
+      </div>
+  {% endblock %}
