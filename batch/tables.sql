@@ -1,5 +1,5 @@
 -- MUST OPEN MYSQL WITH $ mysql --local-infile otherwise it will not work!
-
+create database if not exists tabtracker;
 use tabtracker;
 -- user table, staff table, user table, menuItem table, payment table, ingredient table, recipe table
 drop table if exists orderItem;

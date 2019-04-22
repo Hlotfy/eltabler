@@ -19,10 +19,11 @@ conn = functions.getConn('tabtracker')
 def index():
     return render_template('index.html')
 
-@app.route('/tabs/')
+@app.route('/tabs/',  methods=['GET','POST'])
 def tabs():
-    users = functions.getAllUsers(conn)
-    return render_template('userTabs.html', users=users)
+    if request.method == 'GET':
+        users = functions.getAllUsers(conn)
+        return render_template('userTabs.html', users=users)
     
 @app.route('/order/', methods = ['POST', 'GET'])
 def order():
