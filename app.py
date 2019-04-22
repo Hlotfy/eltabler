@@ -29,7 +29,6 @@ def order():
     items = functions.getAllMenuItems(conn)
     return render_template('order_form.html', items=items)
     
-    
 @app.route('/menu/')
 def menu():
     users = functions.getAllUsers(conn)
@@ -44,7 +43,7 @@ def recent_orders(username):
         form = request.form
         if form:
             form = form.to_dict(flat=False)['miid']
-            print form
+            print(form)
             functions.addOrder(conn,form,username)
             orders = functions.getRecentOrders(conn,username)
             items = functions.getOrderItems(conn,username)
