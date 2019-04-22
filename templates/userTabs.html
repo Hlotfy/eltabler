@@ -4,23 +4,23 @@
 {% block content %}
 <h1>Search User Tabs</h1>
 <div class='main'>
-<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for username" title="Type in a username">
 
-<ul id="myUL">
+<input type="text" id="user_search" onkeyup="searchForUser()" placeholder="Search for username" title="Type in a username">
+
+<ul id="users">
 {% for user in users %}
-
   <li><a href="{{url_for('recent_orders', username=user.username)}}">{{user.username}}</a></li>
-
 {% endfor %}
 </ul>
 </div>
 
 <script>
-function myFunction() {
+
+function searchForUser() {
     var input, filter, ul, li, a, i, txtValue;
-    input = document.getElementById("myInput");
-    filter = input.value.toLowerCase();
-    ul = document.getElementById("myUL");
+    input = document.getElementById("user_search");
+    filter = input.value;
+    ul = document.getElementById("users");
     li = ul.getElementsByTagName("li");
     for (i = 0; i < li.length; i++) {
         a = li[i].getElementsByTagName("a")[0];
