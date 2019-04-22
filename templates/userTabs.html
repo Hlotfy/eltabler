@@ -7,7 +7,7 @@
   box-sizing: border-box;
 }
 
-#myInput {
+#search_user {
   background-image: url('/css/searchicon.png');
   background-position: 10px 12px;
   background-repeat: no-repeat;
@@ -18,13 +18,13 @@
   margin-bottom: 12px;
 }
 
-#myUL {
+#users {
   list-style-type: none;
   padding: 0;
   margin: 0;
 }
 
-#myUL li a {
+#users li a {
   border: 1px solid #ddd;
   margin-top: -1px; /* Prevent double borders */
   background-color: #f6f6f6;
@@ -35,7 +35,7 @@
   display: block
 }
 
-#myUL li a:hover:not(.header) {
+#users li a:hover:not(.header) {
   background-color: #eee;
 }
 </style>
@@ -44,20 +44,20 @@
 
 <h2>Search User Tabs</h2>
 
-<input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for username" title="Type in a username">
+<input type="text" id="user_search" onkeyup="searchForUser()" placeholder="Search for username" title="Type in a username">
 
+<ul id="users">
 {% for user in users %}
-<ul id="myUL">
-  <li><a href="#">{{user.username}}</a></li>
-</ul>
+  <li><a href="{{url_for('recent_orders', username=user.username)}}">{{user.username}}</a></li>
 {% endfor %}
+</ul>
 
 <script>
-function myFunction() {
+function searchForUser() {
     var input, filter, ul, li, a, i, txtValue;
-    input = document.getElementById("myInput");
+    input = document.getElementById("user_search");
     filter = input.value.toUpperCase();
-    ul = document.getElementById("myUL");
+    ul = document.getElementById("users");
     li = ul.getElementsByTagName("li");
     for (i = 0; i < li.length; i++) {
         a = li[i].getElementsByTagName("a")[0];
