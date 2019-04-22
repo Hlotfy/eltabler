@@ -1,6 +1,6 @@
 body {margin:0;}
 
-ul {
+#mbar {
   list-style-type: none;
   margin: 0;
   padding: 0;
@@ -11,11 +11,11 @@ ul {
   width: 100%;
 }
 
-li {
+#lmbar {
   float: left;
 }
 
-li a {
+#lmbar a {
   display: block;
   color: white;
   text-align: center;
@@ -104,3 +104,39 @@ td {
 }
 
 #messages { color: red; font-weight: bold; }
+
+* {
+  box-sizing: border-box;
+}
+
+#user_search {
+  background-position: 10px 12px;
+  background-repeat: no-repeat;
+  width: 40%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+#users {
+  list-style-type: none;
+  width: 40%;
+  padding: 0;
+  margin: 0;
+}
+
+#users li a {
+  border: 1px solid #ddd;
+  margin-top: -1px; /* Prevent double borders */
+  background-color: #f6f6f6;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px;
+  color: black;
+  display: block
+}
+
+#users li a:hover:not(.header) {
+  background-color: #eee;
+}
