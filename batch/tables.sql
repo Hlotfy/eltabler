@@ -4,6 +4,7 @@ create database if not exists tabtracker;
 
 use tabtracker;
 -- user table, staff table, user table, menuItem table, payment table, ingredient table, recipe table
+drop table if exists cart;
 drop table if exists orderItem;
 drop table if exists orders;
 drop table if exists recipe;
@@ -11,8 +12,8 @@ drop table if exists menuItem;
 drop table if exists ingredient;
 drop table if exists payments;
 drop table if exists staff;
+drop table if exists session;
 drop table if exists user;
-
 
 create table menuItem (
     miid int auto_increment,
@@ -50,8 +51,6 @@ OPTIONALLY ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS;
 
-show warnings;
-
 create table recipe (
 -- intermediate table represented by the 'has' relationship between ingredient menuItem
     miid int,
@@ -68,8 +67,6 @@ OPTIONALLY ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS;
 
-show warnings;
-
 create table user (
     username varchar(30),
     name varchar(30),
@@ -83,8 +80,6 @@ FIELDS TERMINATED BY ','
 OPTIONALLY ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS;
-
-show warnings;
 
 create table staff (
     username varchar(30),
@@ -111,17 +106,30 @@ create table orderItem (
 );
 
 create table payments (
-    pid int auto_increment,
+    pid int auto_increment primary key,
     username varchar(30),
     dt datetime,
     method enum('cash','venmo'),
     amount double,
-    foreign key (username) references user (username),
-    primary key (pid)
+    foreign key (username) references user (username)
 );
 
--- select * from menuItem;
--- select * from ingredient;
+create table session (
+    sid int auto_increment primary key,
+    st timestamp,
+    username varchar(30),
+    foreign key (username) references user (username)
+);
+
+create table cart (
+    sid int,
+    miid int,
+    quantity int,
+    foreign key (sid) references session (sid),
+    foreign key (miid) references menuItem (miid),
+    primary key (sid,miid)
+);
+
 
 insert into user(name, username, balanceOwed)
 values ("Hala Lotfy", "hlotfy", 0.00), 
@@ -131,7 +139,6 @@ values ("Hala Lotfy", "hlotfy", 0.00),
        
 insert into staff(username) values ("hlotfy"),("elennonj"),("mkashyap"),("acamacho");
        
-
 insert into orders(dt,username) values(now(),'hlotfy');
 insert into orderItem(oid,miid,quantity) values((select oid from orders where username="hlotfy" limit 1),(select miid from menuItem where name="Yoohoo"),1);
 
@@ -144,39 +151,16 @@ insert into orderItem(oid,miid,quantity) values((select oid from orders where us
 insert into orders(dt,username) values(now(),"mkashyap");
 insert into orderItem(oid,miid,quantity) values((select oid from orders where username="mkashyap" limit 1),(select miid from menuItem where name="Capri Sun"),1);
 
-
--- select * from orders;
-
 insert into orders(dt,username) values(now(),"lorthsmi");
 
--- insert into orders(dt,username) values(now(),"lorthsmi");
+-- insert into payments (username, dt, method, amount) values ("hlotfy", now(), "venmo", 1.50);
+-- insert into payments (username, dt, method, amount) values ("mkashyap", now(), "cash", 0.50);
 
-insert into payments (username, dt, method, amount) values ("hlotfy", now(), "venmo", 1.50);
-insert into payments (username, dt, method, amount) values ("mkashyap", now(), "cash", 0.50);
+-- update user, payments set balanceOwed = balanceOwed - (select sum(payments.amount) from payments where payments.username = user.username) where user.username = payments.username;
 
--- update user, orders, menuItem set user.balanceOwed = (select sum(menuItem.price) from orders inner join menuItem on orders.miid = menuItem.miid where orders.username=user.username) where user.username = orders.username;
-
--- select * from user where balanceOwed > 0;
-
-update user, payments set balanceOwed = balanceOwed - (select sum(payments.amount) from payments where payments.username = user.username) where user.username = payments.username;
-
--- select * from recipe;
-
--- select menuItem.name, menuItem.price, sum(ingredient.price) as 'ingredients price' from recipe inner join menuItem on recipe.miid = menuItem.miid inner join ingredient on recipe.iid = ingredient.iid group by menuItem.miid order by menuItem.name;  
-
--- select recipe.miid, sum(ingredient.price) from recipe inner join ingredient on recipe.iid = ingredient.iid group by recipe.miid;
-
-select user.name, sum(menuItem.price) as 'Tab Balance Owed' from orders inner join user on orders.username=user.username inner join orderItem on orders.oid=orderItem.oid inner join menuItem on orderItem.miid=menuItem.miid group by orders.username; 
-
-select name, balanceOwed from user where balanceOwed > 0;
-
-select menuItem.name, menuItem.miid, menuItem.price, sum(ingredient.price) from menuItem inner join recipe on menuItem.miid=recipe.miid inner join ingredient on recipe.iid=ingredient.iid group by menuItem.miid order by menuItem.miid;
-
--- select user.name, sum(menuItem.price) as 'Tab Balance Owed' from orders inner join user on orders.username=user.username inner join menuItem on orders.miid=menuItem.miid group by orders.username; 
+-- select user.name, sum(menuItem.price) as 'Tab Balance Owed' from orders inner join user on orders.username=user.username inner join orderItem on orders.oid=orderItem.oid inner join menuItem on orderItem.miid=menuItem.miid group by orders.username; 
 
 -- select name, balanceOwed from user where balanceOwed > 0;
 
-insert into staff(username) values('acamacho');
-insert into staff(username) values('elennonj');
-insert into staff(username) values('hlotfy');
-insert into staff(username) values('mkashyap');
+select menuItem.name, menuItem.miid, menuItem.price, sum(ingredient.price) from menuItem inner join recipe on menuItem.miid=recipe.miid inner join ingredient on recipe.iid=ingredient.iid group by menuItem.miid order by menuItem.miid;
+
