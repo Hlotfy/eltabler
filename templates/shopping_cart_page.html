@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+{% extends "index.html" %}
+{% block content %}
+    <h1>
+        Shopping Cart
+        <link rel='stylesheet' href="{{url_for('static', filename = 'cart-example-style.css')}}" media="screen" title="no title" charset="utf-8">
+    </h1>
+    <body>
+    <div class="shopping-cart">
+      <!-- Title -->
+      <div class="title">
+        {{user.name}}'s Shopping Bag
+      </div>
+    
+    <!-- Product #1 -->
+      <div class="item">
+        <div class="buttons">
+          <span class="delete-btn"></span>
+          <span class="like-btn"></span>
+        </div>
+
+        <div class="image">
+          <img src="{{ url_for('static', filename='sandwich1.png') }}" alt="hii" />
+        </div>
+
+        <div class="description">
+          <span>Green Monsta</span>
+          <span>Sandwich</span>
+        </div>
+
+        <div class="quantity">
+          <button class="minus-btn" type="button" name="button">
+            <img src="{{ url_for('static', filename='minus.svg') }}" alt="" />
+          </button>
+          <input type="text" name="name" value="1">
+          <button class="plus-btn" type="button" name="button">
+            <img src="{{ url_for('static', filename='plus.svg') }}" alt="" />
+          </button>
+        </div>
+
+        <div class="total-price">$5</div>
+      </div>
+      
+    {% for item in items %}
+        <div class="item">
+            <div class="buttons">
+              <span class="delete-btn"></span>
+              <span class="like-btn"></span>
+            </div>
+            
+            <div class="image">
+                <img src="{{ url_for('static', filename='sandwich1.png') }}" alt="hii" />
+            </div>
+        
+            <div class="description">
+              <span>{{item.name}}</span>
+            </div>
+            
+            <div class="quantity">
+              <button class="minus-btn" type="button" name="button">
+                <img src="{{ url_for('static', filename='minus.svg') }}" alt="" />
+              </button>
+              <input type="text" name="name" value="1">
+              <button class="plus-btn" type="button" name="button">
+                <img src="{{ url_for('static', filename='plus.svg') }}" alt="" />
+              </button>
+            </div>
+            
+            <div class="total-price">$5</div>
+        </div>
+    {% endfor %}
+  
+    <form action="/hlotfy/recent_orders/" method="POST">
+        <input type="submit" value="Place Order"> <!--should 'place order' and add order info to recent orders page-->
+    </form>
+    
+    <form method=post action="/clearCart/">  <!--need to link clearCart function here, which still needs to be written!! -->
+        <input type=submit name=submit value="Clear Cart">
+     </form>  
+      
+    <form method=post action="/addToTab/">  <!--need to link addToTab function here, which still needs to be written!! -->
+        <input type=submit name=submit value="Add to tab">
+     </form>    
+
+    
+      </div>
+      
+    
+      <script type="text/javascript">
+    /*global $*/
+      $('.minus-btn').on('click', function(e) {
+    		e.preventDefault();
+    		var $this = $(this);
+    		var $input = $this.closest('div').find('input');
+    		var value = parseInt($input.val());
+
+    		if (value > 1) {
+    			value = value - 1;
+    		} else {
+    			value = 0;
+    		}
+
+        $input.val(value);
+
+    	});
+
+    	$('.plus-btn').on('click', function(e) {
+    		e.preventDefault();
+    		var $this = $(this);
+    		var $input = $this.closest('div').find('input');
+    		var value = parseInt($input.val());
+
+    		if (value < 100) {
+      		value = value + 1;
+    		} else {
+    			value =100;
+    		}
+
+    		$input.val(value);
+    	});
+
+      $('.like-btn').on('click', function() {
+        $(this).toggleClass('is-active');
+      });
+      
+      // could link javascript functions here for the addToTab and clearCart and remove (X) buttons!
+      // also need function to dynamically calculate price total based on items in cart!!
+      // also want, for each type of item, function to dynamically update price based on quantity in cart and list price next to item (right now hardcoded!)
+      
+      
+    </script>
+    
+     </body>
+   
+    
+    
+
+{% endblock %}
