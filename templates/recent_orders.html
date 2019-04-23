@@ -25,14 +25,14 @@
     {% for item in items %}
 <div class="panel">
     <table>
-         {% if item.oid == order.oid %}
+        {% if item.oid == order.oid %}
         <tr>
             <td>{{item.name}}</td>
             <td>${{item.item_total}}</td>
             <td>{{item.quantity}}</td>
         
         {% endif %}
-        {% endfor %}
+    {% endfor %}
         </tr>
 
     </table>

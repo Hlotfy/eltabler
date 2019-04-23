@@ -25,15 +25,15 @@ def tabs():
         users = functions.getAllUsers(conn)
         return render_template('userTabs.html', users=users)
     
-@app.route('/order/', methods = ['POST', 'GET'])
+@app.route('/menu/', methods = ['POST', 'GET'])
 def order():
     items = functions.getAllMenuItems(conn)
     return render_template('order_form.html', items=items)
     
-@app.route('/menu/')
-def menu():
-    users = functions.getAllUsers(conn)
-    return render_template('menuScreen.html')
+# @app.route('/menu/')
+# def menu():
+#     users = functions.getAllUsers(conn)
+#     return render_template('menuScreen.html')
 
 @app.route('/<username>/recent_orders/',  methods = ['POST', 'GET'])
 # creates order, adds selected menu items to order
@@ -59,15 +59,21 @@ def recent_orders(username):
     user = functions.getUser(conn,username)
     return render_template('recent_orders.html',orders=orders, items=items, user=user)
 
-@app.route('/cart/')
-def cart():
+@app.route('/<username>/cart/', methods=['GET','POST'])
+def cart(username):
     users = functions.getAllUsers(conn)
-    return render_template('shoppingCart.html', users=users)
+    items = functions.getOrderItems(conn,username)
+    user = functions.getUser(conn,username)
+    #menuItem.name, menuItem.price
+    return render_template('shopping_cart_page.html', items = items, users=users, user = user)
 
 @app.route('/session/cart/', methods=['GET','POST'])
 def session_cart():
     users = functions.getAllUsers(conn)
     cart = session.get('cart', {'beer':0, 'wine':0, 'soda':0}) # use these defaults if cart isn't in session
+    # priceTotal = 0
+    # for i in cart:
+    #     priceTotal += i.getPrice()  //need function to get price of each item in cart
     # ofage = session.get('iam21',False)
     # if request.method == 'POST' and request.form.get('submit') == 'Show Cart':
     #     flash("Showing your cart's contents")
@@ -124,9 +130,9 @@ def payment(username):
     
 @app.route('/addToTab/', methods=['POST'])
 # should we maybe just redirect to my recent_payments page?
-def addToTab():
+def addToTab(username):
     flash('not yet implemented')
-    return redirect(url_for('session_cart'))
+    return redirect(url_for('payment'), username=username)
                            
 if __name__ == '__main__':
     app.debug = True

@@ -47,35 +47,36 @@
   <h1>El Table Menu Items</h1>
   <p><strong>Please Select 1 or More Menu Items to Add to Order</strong></p>
   <div class="main">
-    <!--<div id="ButtonContainer">-->
-    <!--  <button class="btn active" onclick="filter('all')"> Show all</button>-->
-    <!--  <button class="btn" onclick="filter('drinks')"> Drinks</button>-->
-    <!--  <button class="btn" onclick="filter('sandwiches')"> Sandwiches</button>-->
-    <!--  <button class="btn" onclick="filter('candies')"> Candy</button>-->
-    <!--  <button class="btn" onclick="filter('snacks')"> Snack</button>-->
-    <!--</div>-->
+    <div id="ButtonContainer">
+      <button class="btn active" onclick="filter('all')"> Show all</button>
+      <button class="btn" onclick="filter('drinks')"> Drinks</button>
+      <button class="btn" onclick="filter('sandwiches')"> Sandwiches</button>
+      <button class="btn" onclick="filter('candies')"> Candy</button>
+      <button class="btn" onclick="filter('snacks')"> Snack</button>
+    </div>
     <div class="container">
-      <form action="/hlotfy/recent_orders/" method="POST">
+      <!--<form action="/hlotfy/recent_orders/" method="POST">--> <!--moving this to cart!-->
+      <form action="/hlotfy/cart/" method="POST">  
           {% for item in items %}
             {% if item.kind == "sandwich" %}
               <div class="filterDiv sandwiches">
-                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}</input>
+                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
               </div>
             {% elif item.kind == "drink" %}
               <div class="filterDiv drinks">
-                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}</input>
+                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
               </div>
             {% elif item.kind == "candy" %}
               <div class="filterDiv candies">
-                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}</input>
+                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
               </div>
             {% elif item.kind == "snack" %}
               <div class="filterDiv snacks">
-                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}</input>
+                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
               </div>
             {% endif %}
           {% endfor %}
-          <input type="submit">
+          <input type="submit" value="Add to Cart">
       </form>
     </div>
   </div>
