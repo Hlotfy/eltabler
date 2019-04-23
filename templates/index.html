@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+  {% block head %}
+    <head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    </head>
+  {% endblock %}
+    <body>
+        <ul id="mbar">
+          <li id="lmbar"><a href="{{url_for('recent_orders',username="hlotfy")}}">Recent Orders</a></li>
+          <li id="lmbar"><a href="{{url_for('payment',username="hlotfy")}}">Payment</a></li>
+          <li id="lmbar"><a href="{{url_for('order')}}">Menu</a></li>
+          <li id="lmbar"><a href="{{url_for('tabs')}}">User Tabs</a></li>
+          <li id="lmbar"><a href="{{url_for('cart', username='hlotfy')}}">Cart</a></li>
+        </ul>
+        
+        <div id="content", align="center">
+        {% block content %}
+        <br><br>
+        <h2>Login Form</h2>
+
+        <form action="{{url_for('order')}}">
+          <div class="container">
+            <label for="user"><b>Username</b></label>
+            <input type="text" placeholder="Enter Username" name="user" required>
+        
+            <label for="pwd"><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" name="pwd" required>
+                
+            <button type="submit">Login</button>  
+          </div>
+        </form>
+        {% endblock %}
+        
+        </div>
+    </body>
+</html>

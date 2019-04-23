@@ -3,7 +3,7 @@
 '''
 
 Written Spring 2019
-Hala Lotfy
+Dee Dee Lennon-Jones, Hala Lotfy
 '''
 import sys
 import MySQLdb
@@ -14,48 +14,111 @@ def getConn(db):
                            passwd='',
                            db=db)
     return conn
-    
-#### QUESTION: DO WE NEED THIS? (Scott seems like he didn't check if the uid is in the db)
+
+# returns the user's username if they are a staff member, else returns None
 def login(conn,uid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select * from staff where uid=%s',(uid,))
+    curs.execute('select * from staff where username=%s',(uid,))
     user = curs.fetchone()
-    print(user)
-    if user:
-        return user['uid']
-    return False # check if the user exists in the staff database
-
-def getAllOutstandingBalance(conn):
-    '''Returns a list of rows, as dictionaries. selects all movies in the database'''
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select * from user where balanceOwed > 0')
-    return curs.fetchall()
-    
+    if user is not None:
+        return user['username']
+    else:
+        return None
+        
+# gets every user's username and name
 def getAllUsers(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select * from user')
-    return curs.fetchall()
-
-def updateUserBalance(conn,user):
-# works but I'm wondering if there is a better way to do this
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('update user, payments, orders set balanceOwed = (select sum(menuItem.price) from orders inner join menuItem on orders.miid = menuItem.miid where orders.username=user.username) - (select sum(payments.amount) from payments where payments.username = user.username) where user.username = %s; select balanceOwed from user where username=%s',(user,user,))
-    return curs.fetchall()
-
-def searchUser(conn,form):
-    '''returns all movie information using title'''
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    form = '%' + form + '%'
-    curs.execute('select * from user where username like %s',(form,))
+    curs.execute('select username,name from user;')
     return curs.fetchall()
     
-def addOrder(conn,form):
+# get all menu items of a certain category
+def getMenuItemByKind(conn,kind):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('insert into orders(dt,username,miid) values(now(),%s,(select miid from menuItem where name=%s))',(form['username'],form['menuItem']))
-    conn.commit()
-    return updateUserBalance(conn,form['username'])
+    curs.execute('select miid,name,price from menuItem where kind = %s;', (kind,))
+    return curs.fetchall()
 
+# Gets all menu items
+def getAllMenuItems(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from menuItem;')
+    return curs.fetchall()
+
+# Gets the ingredients of a given menu item
+def getIngredients(conn, menuItemId):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from ingredient inner join recipe using (iid) where miid = %s', (menuItemId,))
+    return curs.fetchall()
+
+# Updates the payments table, and the user's current balance in the user table
+def makePayment(conn,username,method,amount):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    #update the user's balance owed
+    curs.execute('select balanceOwed from user where username = %s', (username,))
+    currentBalance = curs.fetchone()
+    newBalance = currentBalance['balanceOwed'] - amount
+    curs.execute('update user set balanceOwed = %s where username = %s', (newBalance,username))
+    #update their payments
+    curs.execute('insert into payments(username,dt,method,amount) values (%s,now(),%s,%s)', (username,method,amount,))
+    conn.commit()
+    return newBalance
+    
+# gets a user's name, username, and balance based on their username
+def getUser(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from user where username = %s',(username,))
+    return curs.fetchone()
+
+# adds an order to the orders table, and updates the user's balance
+def addOrder(conn,form,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('insert into orders(dt,username) values(now(),%s)',(username,))
+    conn.commit()
+    curs.execute('select max(oid) as "oid" from orders where username=%s',(username,))
+    oid = curs.fetchone()['oid']
+    #print(oid)
+    for item in form:
+        addOrderItems(conn,item,oid)
+    curs.execute('select sum(menuItem.price * orderItem.quantity) as total from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s and orderItem.oid=%s',(username,oid))
+    orderTotal = curs.fetchone()['total']
+    print orderTotal
+    curs.execute('update user set balanceOwed = balanceOwed + %s',(orderTotal,))
+    conn.commit()
+    return getRecentOrders(conn,username)
+ 
+#adds each individual order item to orderItem
+def addOrderItems(conn,form,oid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    print form
+    curs.execute('insert into orderItem(oid,miid,quantity) values(%s,%s,1)',(oid,form))
+    conn.commit()
+    return True
+    
+# fetches a user's recent orders based on their username
+def getRecentOrders(conn, user):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select orders.oid, orders.dt, count(orderItem.miid) as item_num, sum(menuItem.price * orderItem.quantity) as "total" from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s group by orders.oid order by orders.oid DESC',(user,))
+    return curs.fetchall()
+    
+# fetches order items associated with a user based on their username
+def getOrderItems(conn,user):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select orders.oid, menuItem.name, menuItem.price, orderItem.quantity, (menuItem.price * orderItem.quantity) as "item_total" from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s order by orders.oid DESC',(user,))
+    return curs.fetchall()
+
+# fetches a user's payment history, based on their username
+def getRecentPayments(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from payments where username = %s order by dt DESC;',(username,))
+    return curs.fetchall()
+
+# for use in short testing
 if __name__ == '__main__':
     conn = getConn('tabtracker')
-    
-   
+    orders = getRecentOrders(conn,"hlotfy")
+    for order in orders:
+        print order
+    print "----------------------------------"
+    items = getOrderItems(conn,"hlotfy")
+    for item in items:
+        print item
+

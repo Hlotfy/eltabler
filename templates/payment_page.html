@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+{% extends "index.html" %}
+{% block content %}
+    <h1>
+        Make a payment
+    </h1>
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div id="messages">
+        {% for msg in messages %}
+            <p>{{msg}}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    
+    {% if msg %}
+    <p>{{msg}}</p>
+    {% endif %}
+    <!-- how do you feed the info to the route? it works but im so confused how -->
+    <form method="POST" action="">
+    <p><label for="amount">Amount</label>
+        <input type="text" id="amount" name="amount">
+        <select name="method">
+            <option value="" disabled selected>Method</option>
+            <option value="cash">Cash</option>
+            <option value="venmo">Venmo</option>
+        </select>
+        
+        </p>
+    <p><input type="submit" value="Submit"></p>
+    
+    {% if payments %}
+    <h2>Payment history</h2>
+    <div id=payments>
+        {% for p in payments %}
+            <p>{{p.dt}}...............{{p.method}}...............{{p.amount}}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+</form>
+    
+{% endblock %}
