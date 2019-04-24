@@ -37,12 +37,6 @@ def getMenuItemByKind(conn,kind):
     curs.execute('select miid,name,price from menuItem where kind = %s;', (kind,))
     return curs.fetchall()
 
-# Gets a user's balance, specified by their username
-def getUserBalance(conn,user):
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select balanceOwed from user where username = %s', (user,))
-    return curs.fetchone()
-
 # Gets all menu items
 def getAllMenuItems(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
