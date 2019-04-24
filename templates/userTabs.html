@@ -9,7 +9,7 @@
 
 <ul id="users">
 {% for user in users %}
-  <li><a href="{{url_for('recent_orders', username=user.username)}}">{{user.username}}</a></li>
+  <li><a href="{{url_for('recent_orders', username = user.username)}}">{{user.username}}</a></li>
 {% endfor %}
 </ul>
 </div>

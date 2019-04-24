@@ -14,37 +14,52 @@ app.secret_key = 'asdflsgflawiewurhe'
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 conn = functions.getConn('tabtracker')
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/tabs/',  methods=['GET','POST'])
+@app.route('/tabs/')
 def tabs():
-    if request.method == 'GET':
-        users = functions.getAllUsers(conn)
-        return render_template('userTabs.html', users=users)
+    logout()
+    users = functions.getAllUsers(conn)
+    return render_template('userTabs.html', users=users)
     
 @app.route('/menu/', methods = ['POST', 'GET'])
 def order():
+    print session.get('username')
     items = functions.getAllMenuItems(conn)
-    return render_template('order_form.html', items=items)
-    
-# @app.route('/menu/')
-# def menu():
-#     users = functions.getAllUsers(conn)
-#     return render_template('menuScreen.html')
+    return render_template('order_form.html', items=items, username = session.get('username'))
+
+#@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    print "logged out user!"
+    print session.get('username')
+    session.clear()
+    #flash('''successfully logged out''')
+    users = functions.getAllUsers(conn)
+    return render_template('userTabs.html',users=users)
+
+#@app.route('/login')
+def login(username):
+    sid = functions.newSession(conn,username)
+    print sid, username
+    session['username'] = username
+    session['sid'] = sid
+    print "logged in as user " + session['username'] + "!"
+    return 
 
 @app.route('/<username>/recent_orders/',  methods = ['POST', 'GET'])
 # creates order, adds selected menu items to order
 # add safeguard so you don't create an order with no order items
 # delete orders with no order items
 def recent_orders(username):
+    login(username)
     if request.method == 'POST':
         form = request.form
         if form:
             form = form.to_dict(flat=False)['miid']
-            print(form)
+            print form
             functions.addOrder(conn,form,username)
             orders = functions.getRecentOrders(conn,username)
             items = functions.getOrderItems(conn,username)
@@ -54,55 +69,43 @@ def recent_orders(username):
             flash('''Please select items to add to your order''')
             return redirect(request.referrer)
     
+    if not session.get('username'):
+        session['username'] = username
+        print session['username']
+
     orders = functions.getRecentOrders(conn,username)
     items = functions.getOrderItems(conn,username)
     user = functions.getUser(conn,username)
     return render_template('recent_orders.html',orders=orders, items=items, user=user)
 
-@app.route('/<username>/cart/', methods=['GET','POST'])
-def cart(username):
-    users = functions.getAllUsers(conn)
-    items = functions.getOrderItems(conn,username)
+@app.route('/cart/', methods=['GET','POST'])
+def cart():
+    username= session.get('username')
+    if not username:
+            return redirect(url_for('tabs'))
+    form = request.form
+    if form:
+        form = form.to_dict(flat=False)['miid']
+        print form
+        functions.addToCart(conn,form,username)
+    items = functions.getCart(conn,username)
     user = functions.getUser(conn,username)
-    #menuItem.name, menuItem.price
-    return render_template('shopping_cart_page.html', items = items, users=users, user = user)
+    return render_template('shopping_cart_page.html', items = items, user = user)
+           
 
-@app.route('/session/cart/', methods=['GET','POST'])
-def session_cart():
-    users = functions.getAllUsers(conn)
-    cart = session.get('cart', {'beer':0, 'wine':0, 'soda':0}) # use these defaults if cart isn't in session
-    # priceTotal = 0
-    # for i in cart:
-    #     priceTotal += i.getPrice()  //need function to get price of each item in cart
-    # ofage = session.get('iam21',False)
-    # if request.method == 'POST' and request.form.get('submit') == 'Show Cart':
-    #     flash("Showing your cart's contents")
-    #     return render_template('cart-template.html',cartContents=True,cart=cart)
-    # elif request.method == 'POST':
-    #     item = request.form.get('itemid')
-    #     if not ofage and item in ['beer','wine']:
-    #         flash('Sorry, you are not of age')
-    #     else:
-    #         cart[item] += 1
-    #         flash('Thank you for buying a glass of '+item)
-    #         session['cart'] = cart # store the updated cart
-    return render_template('shopping-cart-example.html',
-                           cartContents=False,
-                           cart=cart,
-                           users = users)
-
-@app.route('/clearCart/', methods=['POST'])
-def clearCart():
-    flash('not yet implemented')
-    return redirect(url_for('session_cart'))
+# @app.route('/clearCart/', methods=['POST'])
+# def clearCart():
+#     flash('not yet implemented')
+#     return redirect(url_for('session_cart'))
 
 
 @app.route('/<username>/payment/', methods=['GET','POST'])
 # awesome! idea - maybe we use ajax for this in the alpha/beta version?
 def payment(username):
+    
     if request.method == 'GET':
         payments = functions.getRecentPayments(conn,username)
-        return render_template('payment_page.html', payments=payments)
+        return render_template('payment_page.html', payments=payments, user=username)
         
     else: #method must be 'POST'
         #get the payment amount and method
@@ -126,13 +129,7 @@ def payment(username):
         name = functions.getUser(conn,username)['name']
         flash(name + " made a payment of $" + str(amount) + " using " + method + ". Their new balance is $" + str(newBalance) + ".")
         payments = functions.getRecentPayments(conn,username)
-        return render_template('payment_page.html',payments=payments)
-    
-@app.route('/addToTab/', methods=['POST'])
-# should we maybe just redirect to my recent_payments page?
-def addToTab(username):
-    flash('not yet implemented')
-    return redirect(url_for('payment'), username=username)
+        return render_template('payment_page.html', payments=payments, user=username)
                            
 if __name__ == '__main__':
     app.debug = True

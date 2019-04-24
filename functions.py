@@ -16,9 +16,9 @@ def getConn(db):
     return conn
 
 # returns the user's username if they are a staff member, else returns None
-def login(conn,uid):
+def login(conn,username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select * from staff where username=%s',(uid,))
+    curs.execute('select * from staff where username=%s',(username,))
     user = curs.fetchone()
     if user is not None:
         return user['username']
@@ -62,7 +62,7 @@ def makePayment(conn,username,method,amount):
     curs.execute('select balanceOwed from user where username = %s', (username,))
     currentBalance = curs.fetchone()
     newBalance = currentBalance['balanceOwed'] - amount
-    curs.execute('update user set balanceOwed = %s where username = %s', (newBalance,username))
+    curs.execute('update user set balanceOwed = %s where username = %s', (newBalance,username,))
     #update their payments
     curs.execute('insert into payments(username,dt,method,amount) values (%s,now(),%s,%s)', (username,method,amount,))
     conn.commit()
@@ -87,7 +87,7 @@ def addOrder(conn,form,username):
     curs.execute('select sum(menuItem.price * orderItem.quantity) as total from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s and orderItem.oid=%s',(username,oid))
     orderTotal = curs.fetchone()['total']
     print orderTotal
-    curs.execute('update user set balanceOwed = balanceOwed + %s',(orderTotal,))
+    curs.execute('update user set balanceOwed = balanceOwed + %s where username=%s',(orderTotal,username))
     conn.commit()
     return getRecentOrders(conn,username)
  
@@ -117,14 +117,36 @@ def getRecentPayments(conn,username):
     curs.execute('select * from payments where username = %s order by dt DESC;',(username,))
     return curs.fetchall()
 
+def newSession(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('insert into session (username) values (%s)',(username,))
+    conn.commit()
+    curs.execute('select max(sid) as "sid" from session')
+    return curs.fetchone()
+
+def addToCart(conn,form,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select max(sid) from session where username = %s',(username,))
+    sid = curs.fetchone()
+    for item in form:
+        curs.execute('insert into cart(sid,miid,quantity) values((select max(sid) as "sid" from session where username=%s),%s,1) on duplicate key update quantity = quantity+1',(username,item))
+        conn.commit()
+    curs.execute('select sum(menuItem.price * cart.quantity) as total from session inner join cart on (session.sid=cart.sid) inner join menuItem on (cart.miid=menuItem.miid) where session.username=%s and cart.sid=%s',(username,sid))
+    cartTotal = curs.fetchone()['total']
+    print cartTotal
+    #curs.execute('update user set balanceOwed = balanceOwed + %s',(orderTotal,))
+    #conn.commit()
+    return getCart(conn,username)
+
+def getCart(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select max(sid) as "sid" from session where username=%s',(username,))
+    sid = curs.fetchone()["sid"]
+    print sid
+    curs.execute('select menuItem.miid, menuItem.name, menuItem.price, cart.quantity, (menuItem.price * cart.quantity) as "item_total" from cart inner join menuItem on (cart.miid=menuItem.miid) where cart.sid=%s',(sid,))
+    return curs.fetchall()
+
 # for use in short testing
 if __name__ == '__main__':
     conn = getConn('tabtracker')
-    orders = getRecentOrders(conn,"hlotfy")
-    for order in orders:
-        print order
-    print "----------------------------------"
-    items = getOrderItems(conn,"hlotfy")
-    for item in items:
-        print item
-
+    

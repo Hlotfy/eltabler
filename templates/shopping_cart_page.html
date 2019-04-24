@@ -4,15 +4,17 @@
     <h1>
         Shopping Cart
     </h1>
-    <body>
+  <form action="{{url_for('recent_orders', username=user.username)}}" method="POST">
     <div class="shopping-cart">
       <!-- Title -->
       <div class="title">
-        {{user.name}}'s Shopping Bag
+        {{user.username}}'s Shopping Bag
       </div>
-      
+  
     {% for item in items %}
         <div class="item">
+        <input type=hidden name="miid" value="{{item.miid}}">
+
             <div class="buttons">
               <span class="delete-btn"></span>
               <span class="like-btn"></span>
@@ -26,7 +28,8 @@
               <button class="minus-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='minus.svg') }}" alt="" />
               </button>
-              <input type="text" name="name" value="1">
+              <input type="text" name="quantity" value="1">
+
               <button class="plus-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='plus.svg') }}" alt="" />
               </button>
@@ -55,10 +58,10 @@
        <!--         </table>-->
        <!--     </div>-->
             
-    <form action="/hlotfy/recent_orders/" method="POST">
-        
+   
+   
     <input type="submit" value="Place Order"> <!--should 'place order' and add order info to recent orders page-->
-
+    </form>
 
       <!-- Product #1 -->
       <!--<div class="item">-->
@@ -89,7 +92,7 @@
       <!--  <div class="total-price">$5</div>-->
       <!--</div>-->
       </div>
-     </body>
+    
     
     
 

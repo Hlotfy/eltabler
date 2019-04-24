@@ -2,16 +2,31 @@
 <html>
   {% block head %}
     <head>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
     </head>
   {% endblock %}
     <body>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div id="messages">
+        {% for msg in messages %}
+            <p>{{msg}}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    
+    {% if msg %}
+    <p>{{msg}}</p>
+    {% endif %}  
+    
         <ul id="mbar">
-          <li id="lmbar"><a href="{{url_for('recent_orders',username="hlotfy")}}">Recent Orders</a></li>
-          <li id="lmbar"><a href="{{url_for('payment',username="hlotfy")}}">Payment</a></li>
-          <li id="lmbar"><a href="{{url_for('order')}}">Menu</a></li>
-          <li id="lmbar"><a href="{{url_for('tabs')}}">User Tabs</a></li>
-          <li id="lmbar"><a href="{{url_for('cart', username='hlotfy')}}">Cart</a></li>
+          <li id="lmbar"><a href="{{url_for('recent_orders',username=session['username'])}}">Recent Orders</a></li>
+          <li id="lmbar"><a href="{{url_for('payment',username=session['username'])}}">Payment</a></li>
+          <li id="lmbar"><a href="{{url_for('order', username=session['username'])}}">Menu</a></li>
+          <li id="lmbar"><a href="{{url_for('tabs', username=session['username'])}}">User Tabs</a></li>
+          <li id="lmbar"><a href="{{url_for('cart', username=session['username'])}}">Cart</a></li>
         </ul>
         
         <div id="content", align="center">
