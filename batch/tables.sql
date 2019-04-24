@@ -116,7 +116,7 @@ create table payments (
 
 create table session (
     sid int auto_increment primary key,
-    st timestamp,
+    st timestamp default current_timestamp,
     username varchar(30),
     foreign key (username) references user (username)
 );
@@ -139,19 +139,19 @@ values ("Hala Lotfy", "hlotfy", 0.00),
        
 insert into staff(username) values ("hlotfy"),("elennonj"),("mkashyap"),("acamacho");
        
-insert into orders(dt,username) values(now(),'hlotfy');
-insert into orderItem(oid,miid,quantity) values((select oid from orders where username="hlotfy" limit 1),(select miid from menuItem where name="Yoohoo"),1);
+-- insert into orders(dt,username) values(now(),'hlotfy');
+-- insert into orderItem(oid,miid,quantity) values((select oid from orders where username="hlotfy" limit 1),(select miid from menuItem where name="Yoohoo"),1);
 
-insert into orders(dt,username) values(now(),"acamacho");
-insert into orderItem(oid,miid,quantity) values((select oid from orders where username="acamacho" limit 1),(select miid from menuItem where name="Yogurt"),1);
+-- insert into orders(dt,username) values(now(),"acamacho");
+-- insert into orderItem(oid,miid,quantity) values((select oid from orders where username="acamacho" limit 1),(select miid from menuItem where name="Yogurt"),1);
 
-insert into orders(dt,username) values(now(),"elennonj");
-insert into orderItem(oid,miid,quantity) values((select oid from orders where username="elennonj" limit 1),(select miid from menuItem where name="San Pellegrino"),1);
+-- insert into orders(dt,username) values(now(),"elennonj");
+-- insert into orderItem(oid,miid,quantity) values((select oid from orders where username="elennonj" limit 1),(select miid from menuItem where name="San Pellegrino"),1);
 
-insert into orders(dt,username) values(now(),"mkashyap");
-insert into orderItem(oid,miid,quantity) values((select oid from orders where username="mkashyap" limit 1),(select miid from menuItem where name="Capri Sun"),1);
+-- insert into orders(dt,username) values(now(),"mkashyap");
+-- insert into orderItem(oid,miid,quantity) values((select oid from orders where username="mkashyap" limit 1),(select miid from menuItem where name="Capri Sun"),1);
 
-insert into orders(dt,username) values(now(),"lorthsmi");
+-- insert into orders(dt,username) values(now(),"lorthsmi");
 
 -- insert into payments (username, dt, method, amount) values ("hlotfy", now(), "venmo", 1.50);
 -- insert into payments (username, dt, method, amount) values ("mkashyap", now(), "cash", 0.50);
@@ -162,5 +162,5 @@ insert into orders(dt,username) values(now(),"lorthsmi");
 
 -- select name, balanceOwed from user where balanceOwed > 0;
 
-select menuItem.name, menuItem.miid, menuItem.price, sum(ingredient.price) from menuItem inner join recipe on menuItem.miid=recipe.miid inner join ingredient on recipe.iid=ingredient.iid group by menuItem.miid order by menuItem.miid;
+-- select menuItem.name, menuItem.miid, menuItem.price, sum(ingredient.price) from menuItem inner join recipe on menuItem.miid=recipe.miid inner join ingredient on recipe.iid=ingredient.iid group by menuItem.miid order by menuItem.miid;
 
