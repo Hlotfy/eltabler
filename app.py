@@ -18,43 +18,53 @@ conn = functions.getConn('tabtracker')
 def index():
     return render_template('index.html')
 
+@app.route('/staff_login',  methods = ['POST'])
+def staff_login():
+    form = request.form
+    print form
+    staffId = request.form['staffId']
+    session['staffId'] = staffId
+    return redirect(url_for('tabs'))
+    
+@app.route('/staff_logout', methods = ['POST'])
+def staff_logout():
+    session.pop('staffId')
+    print "Logging Out of Staff Account"
+    return redirect(url_for('index'))
+
 @app.route('/tabs/')
 def tabs():
-    logout()
     users = functions.getAllUsers(conn)
     return render_template('userTabs.html', users=users)
     
 @app.route('/menu/', methods = ['POST', 'GET'])
 def order():
-    print session.get('username')
     items = functions.getAllMenuItems(conn)
-    return render_template('order_form.html', items=items, username = session.get('username'))
+    print items
+    return render_template('order_form.html', items=items)
 
-#@app.route('/logout')
-def logout():
-    session.pop('username', None)
-    print "logged out user!"
-    print session.get('username')
-    session.clear()
-    #flash('''successfully logged out''')
-    users = functions.getAllUsers(conn)
-    return render_template('userTabs.html',users=users)
-
-#@app.route('/login')
-def login(username):
-    sid = functions.newSession(conn,username)
-    print sid, username
+@app.route('/access_tab', methods = ['POST'])
+def access_tab(username):
+    sessId = functions.newSession(conn,username)
+    print sessId, username
     session['username'] = username
-    session['sid'] = sid
-    print "logged in as user " + session['username'] + "!"
-    return 
+    session['sessId'] = sessId
+    print "accessing the tab of " + session['username'] + "!"
+    return redirect(url_for('recent_orders', username=session['username']))
+
+@app.route('/leave_tab', methods = ['POST'])
+def leave_tab():
+    session.pop('username')
+    print "leaving user tab!"
+    #flash('''successfully logged out''')
+    return redirect(url_for('tabs'))
 
 @app.route('/<username>/recent_orders/',  methods = ['POST', 'GET'])
 # creates order, adds selected menu items to order
 # add safeguard so you don't create an order with no order items
 # delete orders with no order items
 def recent_orders(username):
-    login(username)
+    access_tab(username)
     if request.method == 'POST':
         form = request.form
         if form:
@@ -68,10 +78,6 @@ def recent_orders(username):
         else:
             flash('''Please select items to add to your order''')
             return redirect(request.referrer)
-    
-    if not session.get('username'):
-        session['username'] = username
-        print session['username']
 
     orders = functions.getRecentOrders(conn,username)
     items = functions.getOrderItems(conn,username)
@@ -80,24 +86,14 @@ def recent_orders(username):
 
 @app.route('/cart/', methods=['GET','POST'])
 def cart():
-    username= session.get('username')
-    if not username:
-            return redirect(url_for('tabs'))
     form = request.form
-    if form:
-        form = form.to_dict(flat=False)['miid']
-        print form
-        functions.addToCart(conn,form,username)
-    items = functions.getCart(conn,username)
-    user = functions.getUser(conn,username)
+    if not form:
+        return redirect(url_for('order'))
+    form = form.to_dict(flat=False)['miid']
+    functions.addToCart(conn,form,session['username'])
+    items = functions.getCart(conn,session['username'])
+    user = functions.getUser(conn,session['username'])
     return render_template('shopping_cart_page.html', items = items, user = user)
-           
-
-# @app.route('/clearCart/', methods=['POST'])
-# def clearCart():
-#     flash('not yet implemented')
-#     return redirect(url_for('session_cart'))
-
 
 @app.route('/<username>/payment/', methods=['GET','POST'])
 # awesome! idea - maybe we use ajax for this in the alpha/beta version?

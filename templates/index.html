@@ -27,6 +27,19 @@
           <li id="lmbar"><a href="{{url_for('order', username=session['username'])}}">Menu</a></li>
           <li id="lmbar"><a href="{{url_for('tabs', username=session['username'])}}">User Tabs</a></li>
           <li id="lmbar"><a href="{{url_for('cart', username=session['username'])}}">Cart</a></li>
+          {% if session['staffId'] %}
+          <form action="{{url_for('staff_logout')}}" method="POST">
+          <li id="lmbar">Signed in as staff: {{session['staffId']}} </li>
+          <button type="submit" id="logout">Staff Logout</button>
+          </form>
+          {% endif %}
+          
+          {% if session['username'] %}
+          <form action="{{url_for('leave_tab')}}" method="POST">
+          <li id="lmbar">On the tab user: {{session['username']}} </li>
+          <button type="submit" id="logout">Leave Tab</button>
+          </form>
+          {% endif %}
         </ul>
         
         <div id="content", align="center">
@@ -34,10 +47,10 @@
         <br><br>
         <h2>Login Form</h2>
 
-        <form action="{{url_for('order')}}">
+        <form action="{{url_for('staff_login')}}" method="POST">
           <div class="container">
-            <label for="user"><b>Username</b></label>
-            <input type="text" placeholder="Enter Username" name="user" required>
+            <label for="staffId"><b>Username</b></label>
+            <input name="staffId" type="text" placeholder="Enter Username" required>
         
             <label for="pwd"><b>Password</b></label>
             <input type="password" placeholder="Enter Password" name="pwd" required>
