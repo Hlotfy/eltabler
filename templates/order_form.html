@@ -7,24 +7,24 @@
   <p><strong>Please Select 1 or More Menu Items to Add to Order</strong></p>
   <div class="main">
     <div class="container">
-      <form action="{{url_for('cart')}}" method='POST'>  
+      <form action="{{url_for('cart')}}" method="POST">  
           {% for item in items %}
             {% if item.kind == "sandwich" %}
-              <div class="filterDiv sandwiches">
+              <!--<div class="filterDiv sandwiches">-->
                 <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
-              </div>
+              <!--</div>-->
             {% elif item.kind == "drink" %}
-              <div class="filterDiv drinks">
+              <!--<div class="filterDiv drinks">-->
                 <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
-              </div>
+              <!--</div>-->
             {% elif item.kind == "candy" %}
-              <div class="filterDiv candies">
+              <!--<div class="filterDiv candies">-->
                 <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
-              </div>
+              <!--</div>-->
             {% elif item.kind == "snack" %}
-              <div class="filterDiv snacks">
+              <!--<div class="filterDiv snacks">-->
                 <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
-              </div>
+              <!--</div>-->
             {% endif %}
           {% endfor %}
           <br><button type="submit">Add To Cart!</button>

@@ -1,11 +1,21 @@
 <!DOCTYPE html>
 {% extends "index.html" %}
 {% block content %}
+
     <h1>
         Make a payment
     </h1>
     
-    <!-- how do you feed the info to the route? it works but im so confused how -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div id="messages">
+        {% for msg in messages %}
+            <h2>{{msg}}</21>
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    
     <form method="POST" action="">
     <p><label for="amount">Amount</label>
         <input type="text" id="amount" name="amount">

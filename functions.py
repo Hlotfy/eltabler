@@ -111,6 +111,7 @@ def getRecentPayments(conn,username):
     curs.execute('select * from payments where username = %s order by dt DESC;',(username,))
     return curs.fetchall()
 
+# creates new session for selected user tab
 def newSession(conn,username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('insert into session (username) values (%s)',(username,))
@@ -118,6 +119,7 @@ def newSession(conn,username):
     curs.execute('select max(sid) as "sid" from session')
     return curs.fetchone()
 
+# adds the selected menu items to the cart table
 def addToCart(conn,form,username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select max(sid) from session where username = %s',(username,))
@@ -132,6 +134,7 @@ def addToCart(conn,form,username):
     #conn.commit()
     return getCart(conn,username)
 
+# returns content to user's cart for current session
 def getCart(conn,username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select max(sid) as "sid" from session where username=%s',(username,))

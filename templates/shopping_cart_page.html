@@ -28,7 +28,7 @@
               <button class="minus-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='minus.svg') }}" alt="" />
               </button>
-              <input type="text" name="quantity" value="1">
+              <input type="text" name="quantity" value="{{item.quantity}}">
 
               <button class="plus-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='plus.svg') }}" alt="" />
@@ -36,64 +36,12 @@
             </div>
         </div>
     {% endfor %}
-       <!-- {% for item in items %}-->
-           <!--<div class="item">-->
-           <!-- <div class="buttons">-->
-           <!--   <span class="delete-btn"></span>-->
-           <!--   <span class="like-btn"></span>-->
-           <!-- </div>-->
-            
-       <!--     <div class="description">-->
-       <!--       <span>{{item.name}}</span>-->
-       <!--     </div>-->
-       
-       <!--     <div class="panel">-->
-       <!--         <table>-->
-       <!--             <tr>-->
-       <!--                 <td>{{item.name}}</td>-->
-       <!--                 <td>${{item.item_total}}</td>-->
-       <!--                 <td>{{item.quantity}}</td>-->
-       <!--{% endfor %}-->
-       <!--             </tr>-->
-       <!--         </table>-->
-       <!--     </div>-->
-            
-   
+      
    
     <button type="submit">Place Order!</button> <!--should 'place order' and add order info to recent orders page-->
     </form>
 
-      <!-- Product #1 -->
-      <!--<div class="item">-->
-      <!--  <div class="buttons">-->
-      <!--    <span class="delete-btn"></span>-->
-      <!--    <span class="like-btn"></span>-->
-      <!--  </div>-->
-
-      <!--  <div class="image">-->
-      <!--    <img src="{{ url_for('static', filename='sandwich1.png') }}" alt="hii" />-->
-      <!--  </div>-->
-
-      <!--  <div class="description">-->
-      <!--    <span>Green Monsta</span>-->
-      <!--    <span>Sandwich</span>-->
-      <!--  </div>-->
-
-      <!--  <div class="quantity">-->
-      <!--    <button class="minus-btn" type="button" name="button">-->
-      <!--      <img src="{{ url_for('static', filename='minus.svg') }}" alt="" />-->
-      <!--    </button>-->
-      <!--    <input type="text" name="name" value="1">-->
-      <!--    <button class="plus-btn" type="button" name="button">-->
-      <!--      <img src="{{ url_for('static', filename='plus.svg') }}" alt="" />-->
-      <!--    </button>-->
-      <!--  </div>-->
-
-      <!--  <div class="total-price">$5</div>-->
-      <!--</div>-->
+     
       </div>
     
-    
-    
-
 {% endblock %}

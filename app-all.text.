@@ -1,0 +1,1149 @@
+#!/usr/local/bin/python2.7
+
+from flask import (Flask, render_template, make_response, url_for, request,
+                   redirect, flash, session, send_from_directory, jsonify)
+#from werkzeug import secure_filename
+app = Flask(__name__)
+
+import sys,os,random,functions
+from werkzeug.datastructures import ImmutableMultiDict
+
+app.secret_key = 'asdflsgflawiewurhe'
+
+# This gets us better error messages for certain common request errors
+app.config['TRAP_BAD_REQUEST_ERRORS'] = True
+conn = functions.getConn('tabtracker')
+
+@app.route('/')
+# the index page of the app, which includes the staff login form
+def index():
+    return render_template('index.html')
+
+@app.route('/staff_login',  methods = ['POST'])
+# route which processes the staff login and adds the username to the session
+def staff_login():
+    form = request.form
+    print form
+    staffId = request.form['staffId']
+    session['staffId'] = staffId
+    return redirect(url_for('tabs'))
+    
+@app.route('/staff_logout', methods = ['POST'])
+# rotue which processes the staff logout and removes the username from the session
+def staff_logout():
+    session.pop('staffId')
+    print "Logging Out of Staff Account"
+    return redirect(url_for('index'))
+
+@app.route('/tabs/')
+# route which renders the user tabs page which all current usernames
+def tabs():
+    users = functions.getAllUsers(conn)
+    return render_template('userTabs.html', users=users)
+    
+@app.route('/menu/', methods = ['POST', 'GET'])
+#route which renders the menu page which all current menu items
+def order():
+    items = functions.getAllMenuItems(conn)
+    return render_template('order_form.html', items=items)
+
+@app.route('/access_tab', methods = ['POST'])
+# route which processes access to the selected user's tab, adding the username to the session and creating a sesion id for the session
+def access_tab(username):
+    sessId = functions.newSession(conn,username)
+    session['username'] = username
+    session['sessId'] = sessId
+    print "accessing the tab of " + session['username'] + "!"
+    return redirect(url_for('recent_orders', username=session['username']))
+
+@app.route('/leave_tab', methods = ['POST'])
+def leave_tab():
+    session.pop('username')
+    print "leaving user tab!"
+    return redirect(url_for('tabs'))
+
+@app.route('/<username>/recent_orders/',  methods = ['POST', 'GET'])
+# creates order, adds selected menu items to cart
+# add safeguard so you don't create an order with no order items
+# delete orders with no order items
+def recent_orders(username):
+    access_tab(username)
+    if request.method == 'POST':
+        form = request.form
+        if form:
+            form = form.to_dict(flat=False)['miid']
+            print form
+            functions.addOrder(conn,form,username)
+            orders = functions.getRecentOrders(conn,username)
+            items = functions.getOrderItems(conn,username)
+            user = functions.getUser(conn,username)
+            return render_template('recent_orders.html',orders=orders, items=items, user=user)
+        else:
+            return redirect(request.referrer)
+
+    orders = functions.getRecentOrders(conn,username)
+    items = functions.getOrderItems(conn,username)
+    user = functions.getUser(conn,username)
+    return render_template('recent_orders.html',orders=orders, items=items, user=user)
+
+@app.route('/cart/', methods=['GET','POST'])
+# keeps track of all selected menu items for current session and renders cart template
+def cart():
+    form = request.form
+    if not form:
+        items = functions.getCart(conn,session['username'])
+        if not items:
+            return redirect(url_for('order'))
+        user = functions.getUser(conn,session['username'])
+        return render_template('shopping_cart_page.html', items = items, user = user)
+    form = form.to_dict(flat=False)['miid']
+    functions.addToCart(conn,form,session['username'])
+    items = functions.getCart(conn,session['username'])
+    user = functions.getUser(conn,session['username'])
+    return render_template('shopping_cart_page.html', items = items, user = user)
+
+@app.route('/<username>/payment/', methods=['GET','POST'])
+# accesses payment history for selected user and allows payments to be made to user's tab balance
+def payment(username):
+    
+    if request.method == 'GET':
+        payments = functions.getRecentPayments(conn,username)
+        return render_template('payment_page.html', payments=payments, user=username)
+        
+    else: #method must be 'POST'
+        #get the payment amount and method
+        amount = request.form.get('amount')
+        method = request.form.get('method')
+        
+        try:
+            # convert to float to type check and to insert into database
+            amount = float(amount)
+        except ValueError:
+            flash("Please enter an number.")
+            return render_template("payment_page.html")
+            
+        # make sure the employee enters a payment method
+        if method == None:
+            flash("Please select a payment method.")
+            return render_template("payment_page.html")
+            
+        #calculates the user's new balance and updates the database
+        newBalance = functions.makePayment(conn,username,method,amount)
+        name = functions.getUser(conn,username)['name']
+        flash(name + " made a payment of $" + str(amount) + " using " + method + ". Their new balance is $" + str(newBalance) + ".")
+        payments = functions.getRecentPayments(conn,username)
+        return render_template('payment_page.html', payments=payments, user=username)
+                           
+if __name__ == '__main__':
+    app.debug = True
+    app.run('0.0.0.0',8081)
+
+#!/usr/local/bin/python2.7
+
+'''
+
+Written Spring 2019
+Dee Dee Lennon-Jones, Hala Lotfy
+'''
+import sys
+import MySQLdb
+
+def getConn(db):
+    conn = MySQLdb.connect(host='localhost',
+                           user='ubuntu',
+                           passwd='',
+                           db=db)
+    return conn
+
+# returns the user's username if they are a staff member, else returns None
+def login(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from staff where username=%s',(username,))
+    user = curs.fetchone()
+    if user is not None:
+        return user['username']
+    else:
+        return None
+        
+# gets every user's username and name
+def getAllUsers(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select username,name from user;')
+    return curs.fetchall()
+    
+# get all menu items of a certain category
+def getMenuItemByKind(conn,kind):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select miid,name,price from menuItem where kind = %s;', (kind,))
+    return curs.fetchall()
+
+# Gets all menu items
+def getAllMenuItems(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from menuItem;')
+    return curs.fetchall()
+
+# Gets the ingredients of a given menu item
+def getIngredients(conn, menuItemId):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from ingredient inner join recipe using (iid) where miid = %s', (menuItemId,))
+    return curs.fetchall()
+
+# Updates the payments table, and the user's current balance in the user table
+def makePayment(conn,username,method,amount):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    #update the user's balance owed
+    curs.execute('select balanceOwed from user where username = %s', (username,))
+    currentBalance = curs.fetchone()
+    newBalance = currentBalance['balanceOwed'] - amount
+    curs.execute('update user set balanceOwed = %s where username = %s', (newBalance,username,))
+    #update their payments
+    curs.execute('insert into payments(username,dt,method,amount) values (%s,now(),%s,%s)', (username,method,amount,))
+    conn.commit()
+    return newBalance
+    
+# gets a user's name, username, and balance based on their username
+def getUser(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from user where username = %s',(username,))
+    return curs.fetchone()
+
+# adds an order to the orders table, and updates the user's balance
+def addOrder(conn,form,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('insert into orders(dt,username) values(now(),%s)',(username,))
+    conn.commit()
+    curs.execute('select max(oid) as "oid" from orders where username=%s',(username,))
+    oid = curs.fetchone()['oid']
+    #print(oid)
+    for item in form:
+        addOrderItems(conn,item,oid)
+    curs.execute('select sum(menuItem.price * orderItem.quantity) as total from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s and orderItem.oid=%s',(username,oid))
+    orderTotal = curs.fetchone()['total']
+    print orderTotal
+    curs.execute('update user set balanceOwed = balanceOwed + %s where username=%s',(orderTotal,username))
+    conn.commit()
+    return getRecentOrders(conn,username)
+ 
+#adds each individual order item to orderItem
+def addOrderItems(conn,form,oid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    print form
+    curs.execute('insert into orderItem(oid,miid,quantity) values(%s,%s,1)',(oid,form))
+    conn.commit()
+    return True
+    
+# fetches a user's recent orders based on their username
+def getRecentOrders(conn, user):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select orders.oid, orders.dt, count(orderItem.miid) as item_num, sum(menuItem.price * orderItem.quantity) as "total" from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s group by orders.oid order by orders.oid DESC',(user,))
+    return curs.fetchall()
+    
+# fetches order items associated with a user based on their username
+def getOrderItems(conn,user):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select orders.oid, menuItem.name, menuItem.price, orderItem.quantity, (menuItem.price * orderItem.quantity) as "item_total" from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s order by orders.oid DESC',(user,))
+    return curs.fetchall()
+
+# fetches a user's payment history, based on their username
+def getRecentPayments(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from payments where username = %s order by dt DESC;',(username,))
+    return curs.fetchall()
+
+# creates new session for selected user tab
+def newSession(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('insert into session (username) values (%s)',(username,))
+    conn.commit()
+    curs.execute('select max(sid) as "sid" from session')
+    return curs.fetchone()
+
+# adds the selected menu items to the cart table
+def addToCart(conn,form,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select max(sid) from session where username = %s',(username,))
+    sid = curs.fetchone()
+    for item in form:
+        curs.execute('insert into cart(sid,miid,quantity) values((select max(sid) as "sid" from session where username=%s),%s,1) on duplicate key update quantity = quantity+1',(username,item))
+        conn.commit()
+    curs.execute('select sum(menuItem.price * cart.quantity) as total from session inner join cart on (session.sid=cart.sid) inner join menuItem on (cart.miid=menuItem.miid) where session.username=%s and cart.sid=%s',(username,sid))
+    cartTotal = curs.fetchone()['total']
+    print cartTotal
+    #curs.execute('update user set balanceOwed = balanceOwed + %s',(orderTotal,))
+    #conn.commit()
+    return getCart(conn,username)
+
+# returns content to user's cart for current session
+def getCart(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select max(sid) as "sid" from session where username=%s',(username,))
+    sid = curs.fetchone()["sid"]
+    print sid
+    curs.execute('select menuItem.miid, menuItem.name, menuItem.price, cart.quantity, (menuItem.price * cart.quantity) as "item_total" from cart inner join menuItem on (cart.miid=menuItem.miid) where cart.sid=%s',(sid,))
+    return curs.fetchall()
+
+# for use in short testing
+if __name__ == '__main__':
+    conn = getConn('tabtracker')
+    
+username,name,balanceOwed
+mahluwal,Meha,0
+dassefa,Dagmawit Libanos,0
+tatluri,Trisha,0
+sbapat,Sanika Sudhir,0
+ibryant,Isabel,0
+hcho5,Heidi,0
+ichun2,Isabelle,0
+scohelea,Silvie,0
+eczepiel,Ellie,0
+cdouga,Caitlynn,0
+bdupreej,Breana,0
+ygan,Yuna,0
+bgarcia,Beryce,0
+ngates,Nicole,0
+rhuang2,Lisa,0
+ihussain,Iman,0
+ckneer,Coco,0
+alangsto,Alison,0
+alewi,Anah,0
+hli3,Huihan,0
+ili,Isabelle,0
+slu5,Shan,0
+aludwig,Analiese,0
+lluo2,Lauren,0
+amocanas,Anca,0
+mmubayi,Maya,0
+lorthsmi,Lily,0
+ypan2,Alice,0
+spleasan,Sabene,0
+rrettig,Riley,0
+rriley2,Rebecca,0
+srosassm,Sophie,0
+arothsch,Annabel,0
+aseo,Audrey,0
+hsessa,Hunter,0
+jshiue,Jocelyn,0
+eshumadi,Emma,0
+ktanakap,Kalau,0
+atinney,Alissa,0
+ltso,Lauren,0
+mugelsta,Maggie,0
+kumarova,Khonzoda,0
+ewang10,Emily,0
+zwiles,Zoe,0
+syan,Sarah,0
+hyi2,Hannah,0
+jzhao2,Joyce,0
+vzygoura,Viki,0iid,name,kind,price,instock
+0,sourdough,bread,0,1
+0,wheat,bread,0,1
+0,multigrain,bread,0,1
+0,rye,bread,0,1
+0,rosemary garlic,bread,0,1
+0,bagel,bread,0.5,1
+0,croissant,bread,0.5,1
+0,provolone,cheese,0,1
+0,cheddar,cheese,0,1
+0,muenster,cheese,0,1
+0,swiss,cheese,0,1
+0,goat,cheese,0.5,1
+0,brie,cheese,0.5,1
+0,bacon,meat,0,1
+0,ham,meat,0,1
+0,turkey,meat,0,1
+0,greens,extra,0,1
+0,tomato,extra,0,1
+0,mayonnaise,extra,0,1
+0,mustard,extra,0,1
+0,dijon,extra,0,1
+0,hot sauce,extra,0,1
+0,sriracha,extra,0,1
+0,butter,extra,0,1
+0,honey,extra,0,1
+0,sun-dried tomatoes,extra,0.5,1
+0,roasted red peppers,extra,0.5,1
+0,pesto,extra,0.5,1
+0,artichoke tapenade,extra,0.5,1
+0,olive tapenade,extra,0.5,1
+0,apple,extra,0.5,1
+0,fig jam,extra,0.5,1
+0,strawberry jam,extra,0.5,1
+0,peanut butter,extra,0.5,1
+0,cream cheese,extra,0.5,1
+0,hummus,extra,0.5,1
+0,pepper jelly,extra,0.5,1
+0,walnuts,extra,0.5,1
+0,cranberry sauce,extra,0.5,1
+0,avocado,extra,1,1
+0,nutella,extra,1,1
+0,cookie butter,extra,1,1
+0,cheese sandwich,base,3.5,1
+0,meat sandwich,base,4.5,1
+0,meat cheese sandwich,base,5,1
+0,toast,base,1,1miid,name,kind,price,instock
+0,Yoohoo,drink,1,1
+0,San Pellegrino,drink,1.25,1
+0,Capri Sun,drink,0.75,1
+0,Candy,candy,0.25,1
+0,Full Size Chips,snack,1,1
+0,Small Chips,snack,0.75,1
+0,Yogurt,snack,2,1
+0,Kashi bar,snack,1,1
+0,Gum,candy,1,1
+0,ABCD,sandwich,5.5,1
+0,LGBLT,sandwich,4.5,1
+0,Bread Serious,sandwich,6.5,1
+0,The Bro-wich,sandwich,5,1
+0,The Consensu-el,sandwich,2,1
+0,El Table Club,sandwich,7,1
+0,The Green Monstah,sandwich,5,1
+0,Italiano,sandwich,6,1
+0,Spice Jam,sandwich,4.5,1
+0,Le Petit Francais,sandwich,6,1
+0,Murphys Law,sandwich,4.5,1
+0,Love Snack,sandwich,3.5,1
+0,Sharp n Sweet,sandwich,4.5,1
+0,cheese sandwich,sandwich,3.5,1
+0,meat sandwich,sandwich,4.5,1
+0,meat cheese sandwich,sandwich,5,1
+0,toast,base,1.00,1use tabtracker;
+
+
+select * from orders;
+
+insert into orders(dt,username) values(now(),"lorthsmi");
+
+-- insert into orders(dt,username) values(now(),"lorthsmi");
+
+insert into payments (username, dt, method, amount) values ("hlotfy", now(), "venmo", 1.50);
+insert into payments (username, dt, method, amount) values ("mkashyap", now(), "cash", 0.50);
+
+-- update user, orders, menuItem set user.balanceOwed = (select sum(menuItem.price) from orders inner join menuItem on orders.miid = menuItem.miid where orders.username=user.username) where user.username = orders.username;
+
+-- select * from user where balanceOwed > 0;
+
+update user, payments set balanceOwed = balanceOwed - (select sum(payments.amount) from payments where payments.username = user.username) where user.username = payments.username;
+
+select * from recipe;
+
+select menuItem.name, menuItem.price, sum(ingredient.price) as 'ingredients price' from recipe inner join menuItem on recipe.miid = menuItem.miid inner join ingredient on recipe.iid = ingredient.iid group by menuItem.miid order by menuItem.name;  
+
+select recipe.miid, sum(ingredient.price) from recipe inner join ingredient on recipe.iid = ingredient.iid group by recipe.miid;
+
+select user.name, sum(menuItem.price) as 'Tab Balance Owed' from orders inner join user on orders.username=user.username inner join orderItem on orders.oid=orderItem.oid inner join menuItem on orderItem.miid=menuItem.miid group by orders.username; 
+
+select name, balanceOwed from user where balanceOwed > 0;
+
+select menuItem.name, menuItem.miid, menuItem.price, sum(ingredient.price) from menuItem inner join recipe on menuItem.miid=recipe.miid inner join ingredient on recipe.iid=ingredient.iid group by menuItem.miid order by menuItem.miid;
+
+insert into orders(dt,username) values(now(),'hlotfy');
+insert into orderItem (oid,miid,quantity) values ((select max(oid) from orders where username="hlotfy"),(select miid from menuItem where name="ABCD"), 1);
+insert into orderItem (oid,miid,quantity) values ((select max(oid) from orders where username="hlotfy"),(select miid from menuItem where name="San Pellegrino"), 2);
+
+-- returns all items in every order, as well as their unit price, their total item price, and their quantity
+select orders.*, menuItem.name, menuItem.price, orderItem.quantity, (menuItem.price * orderItem.quantity) as "item total" from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username="hlotfy" and orders.oid=1;
+
+-- returns total for each order --
+select orders.oid, orders.dt, orders.username, sum(menuItem.price * orderItem.quantity) as "order total" from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username="hlotfy" group by orderItem.oid;
+
+select orders.oid, orders.dt, orders.username, sum(menuItem.price * orderItem.quantity) as "order total" from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) group by orderItem.oid;
+
+select orders.*, menuItem.name, menuItem.price, orderItem.quantity, (menuItem.price * orderItem.quantity) as "item total" from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username="hlotfy" and orders.oid=1;
+
+select orderItem.*, menuItem.name from orderItem inner join menuItem on (orderItem.miid=menuItem.miid) where oid=1;    
+
+insert into orderItem (oid,miid,quantity) values ((select max(oid) from orders where username="hlotfy"),(select miid from menuItem where name="Bread Serious"), 1), ((select max(oid) from orders where username="hlotfy"),(select miid from menuItem where name="Candy"), 3);
+
+-- returns all empty orders (orders that do not have any orderItems)
+select orders.oid from orders left join orderItem on (orders.oid=orderItem.oid) where orderItem.oid is NULL;
+
+delete from orders where oid in (select orders.oid from orders left join orderItem on (orders.oid=orderItem.oid) where orderItem.oid is NULL); 
+
+delete from orders where oid in (25,26,27,28,34,35,36,37,38,39,40,41,42,43,44,45,56);
+
+-- calculate balance owed
+select orders.username, sum(menuItem.price * orderItem.quantity) as 'total' from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) group by orders.username; 
+
+select sum(menuItem.price * orderItem.quantity) as 'total' from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s,(username,);
+
+insert into orderItem (oid,miid,quantity) values ((select max(oid) from orders where username="elennonj"),(select miid from menuItem where name = "Bread Serious"), 10);
+
+-- update individual balanceOwed
+update user,orders set balanceOwed = 
+    (select sum(menuItem.price * orderItem.quantity) as 'total' 
+    from orders 
+        inner join 
+        orderItem 
+            on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username="hlotfy") where user.username="hlotfy";
+
+-- update everyone's balanceOwed
+update user,orders set balanceOwed = (select sum(menuItem.price * orderItem.quantity) as 'total' from orders left join orderItem on (orders.oid=orderItem.oid) left join menuItem on (orderItem.miid=menuItem.miid) where orders.username=user.username);
+
+update user,orders,payments set balanceOwed = ((select (sum(menuItem.price * orderItem.quantity)-sum(payments.amount)) as 'total' from orders left join orderItem on (orders.oid=orderItem.oid) left join menuItem on (orderItem.miid=menuItem.miid) left join payments on (user.username=payments.username) where orders.username=user.username, user.username<>payments.username);
+
+-- add most recent order total to balance
+
+update user,orders set balanceOwed = balanceOwed + (select sum(menuItem.price * orderItem.quantity) from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where user.username="hlotfy" group by orders.oid limit 1) where user.username="hlotfy"; 
+
+-- delete most recent order total from balance
+update user,orders set balanceOwed = balanceOwed - (select sum(menuItem.price * orderItem.quantity) from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where user.username="hlotfy" group by orders.oid limit 1) where user.username="hlotfy"; 
+
+-- subtract most recent payment amount from balance
+update user,payments set balanceOwed = balanceOwed - (select amount from payments where username="hlotfy" limit 1) where user.username="hlotfy";        
+miid,iid
+10,31
+10,14
+10,9
+10,21
+10,2
+10,45
+11,17
+11,14
+11,18
+11,19
+11,1
+11,45
+20,9
+20,40
+20,18
+20,4
+20,43
+19,13
+19,31
+19,25
+19,7
+19,43
+14,40
+14,3
+14,46-- MUST OPEN MYSQL WITH $ mysql --local-infile otherwise it will not work!
+
+create database if not exists tabtracker;
+
+use tabtracker;
+-- user table, staff table, user table, menuItem table, payment table, ingredient table, recipe table
+drop table if exists cart;
+drop table if exists orderItem;
+drop table if exists orders;
+drop table if exists recipe;
+drop table if exists menuItem;
+drop table if exists ingredient;
+drop table if exists payments;
+drop table if exists staff;
+drop table if exists session;
+drop table if exists user;
+
+create table menuItem (
+    miid int auto_increment,
+    name varchar(30),
+    kind enum('drink','snack','candy','sandwich'),
+    price double,
+    quantity int,
+    primary key (miid)
+);
+
+load data local infile 'menuItems.csv'
+INTO TABLE menuItem 
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
+
+select * from menuItem;
+
+show warnings;
+
+create table ingredient (
+    iid int auto_increment,
+    name varchar(30),
+    kind enum('bread', 'meat', 'cheese', 'extra', 'base'),
+    price double,
+    quantity int,
+    primary key (iid)
+);
+
+load data local infile 'ingredients.csv'
+INTO TABLE ingredient 
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
+
+create table recipe (
+-- intermediate table represented by the 'has' relationship between ingredient menuItem
+    miid int,
+    iid int,
+    foreign key (miid) references menuItem (miid),
+    foreign key (iid) references ingredient (iid),
+    primary key (miid, iid)
+);
+
+load data local infile 'recipes.csv'
+INTO TABLE recipe
+FIELDS TERMINATED BY ',' 
+OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
+
+create table user (
+    username varchar(30),
+    name varchar(30),
+    balanceOwed double,
+    primary key (username)
+);
+
+load data local infile 'directory_search.csv'
+INTO TABLE user
+FIELDS TERMINATED BY ','
+OPTIONALLY ENCLOSED BY '"'
+LINES TERMINATED BY '\n'
+IGNORE 1 ROWS;
+
+create table staff (
+    username varchar(30),
+    password varchar(30),
+    foreign key (username) references user (username),
+    primary key (username)
+);
+
+create table orders (
+    oid int auto_increment,
+    dt datetime,
+    username varchar(30),
+    foreign key (username) references user (username),
+    primary key (oid)
+);
+
+create table orderItem (
+    oid int,
+    miid int,
+    quantity int,
+    foreign key (oid) references orders (oid),
+    foreign key (miid) references menuItem (miid),
+    primary key (oid, miid)
+);
+
+create table payments (
+    pid int auto_increment primary key,
+    username varchar(30),
+    dt datetime,
+    method enum('cash','venmo'),
+    amount double,
+    foreign key (username) references user (username)
+);
+
+create table session (
+    sid int auto_increment primary key,
+    st timestamp default current_timestamp,
+    username varchar(30),
+    foreign key (username) references user (username)
+);
+
+create table cart (
+    sid int,
+    miid int,
+    quantity int,
+    foreign key (sid) references session (sid),
+    foreign key (miid) references menuItem (miid),
+    primary key (sid,miid)
+);
+
+
+insert into user(name, username, balanceOwed)
+values ("Hala Lotfy", "hlotfy", 0.00), 
+       ("Dee Dee Lennon-Jones", "elennonj", 0.00), 
+       ("Mona Kashyap", "mkashyap", 0.00), 
+       ("Aliza Camacho", "acamacho", 0.00);
+       
+insert into staff(username) values ("hlotfy"),("elennonj"),("mkashyap"),("acamacho");
+       
+-- insert into orders(dt,username) values(now(),'hlotfy');
+-- insert into orderItem(oid,miid,quantity) values((select oid from orders where username="hlotfy" limit 1),(select miid from menuItem where name="Yoohoo"),1);
+
+-- insert into orders(dt,username) values(now(),"acamacho");
+-- insert into orderItem(oid,miid,quantity) values((select oid from orders where username="acamacho" limit 1),(select miid from menuItem where name="Yogurt"),1);
+
+-- insert into orders(dt,username) values(now(),"elennonj");
+-- insert into orderItem(oid,miid,quantity) values((select oid from orders where username="elennonj" limit 1),(select miid from menuItem where name="San Pellegrino"),1);
+
+-- insert into orders(dt,username) values(now(),"mkashyap");
+-- insert into orderItem(oid,miid,quantity) values((select oid from orders where username="mkashyap" limit 1),(select miid from menuItem where name="Capri Sun"),1);
+
+-- insert into orders(dt,username) values(now(),"lorthsmi");
+
+-- insert into payments (username, dt, method, amount) values ("hlotfy", now(), "venmo", 1.50);
+-- insert into payments (username, dt, method, amount) values ("mkashyap", now(), "cash", 0.50);
+
+-- update user, payments set balanceOwed = balanceOwed - (select sum(payments.amount) from payments where payments.username = user.username) where user.username = payments.username;
+
+-- select user.name, sum(menuItem.price) as 'Tab Balance Owed' from orders inner join user on orders.username=user.username inner join orderItem on orders.oid=orderItem.oid inner join menuItem on orderItem.miid=menuItem.miid group by orders.username; 
+
+-- select name, balanceOwed from user where balanceOwed > 0;
+
+-- select menuItem.name, menuItem.miid, menuItem.price, sum(ingredient.price) from menuItem inner join recipe on menuItem.miid=recipe.miid inner join ingredient on recipe.iid=ingredient.iid group by menuItem.miid order by menuItem.miid;
+
+<!DOCTYPE html>
+<html>
+  {% block head %}
+    <head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
+    </head>
+  {% endblock %}
+    <body>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div id="messages">
+        {% for msg in messages %}
+            <p>{{msg}}</p>
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    
+    {% if msg %}
+    <p>{{msg}}</p>
+    {% endif %}  
+    
+        <ul id="mbar">
+          <li id="lmbar"><a href="{{url_for('recent_orders',username=session['username'])}}">Recent Orders</a></li>
+          <li id="lmbar"><a href="{{url_for('payment',username=session['username'])}}">Payment</a></li>
+          <li id="lmbar"><a href="{{url_for('order', username=session['username'])}}">Menu</a></li>
+          <li id="lmbar"><a href="{{url_for('tabs', username=session['username'])}}">User Tabs</a></li>
+          <li id="lmbar"><a href="{{url_for('cart', username=session['username'])}}">Cart</a></li>
+          {% if session['staffId'] %}
+          <form action="{{url_for('staff_logout')}}" method="POST">
+          <li id="lmbar">Signed in as staff: {{session['staffId']}} </li>
+          <button type="submit" id="logout">Staff Logout</button>
+          </form>
+          {% endif %}
+          
+          {% if session['username'] %}
+          <form action="{{url_for('leave_tab')}}" method="POST">
+          <li id="lmbar">On the tab user: {{session['username']}} </li>
+          <button type="submit" id="logout">Leave Tab</button>
+          </form>
+          {% endif %}
+        </ul>
+        
+        <div id="content", align="center">
+        {% block content %}
+        <br><br>
+        <h2>Login Form</h2>
+
+        <form action="{{url_for('staff_login')}}" method="POST">
+          <div class="container">
+            <label for="staffId"><b>Username</b></label>
+            <input name="staffId" type="text" placeholder="Enter Username" required>
+        
+            <label for="pwd"><b>Password</b></label>
+            <input type="password" placeholder="Enter Password" name="pwd" required>
+                
+            <button type="submit">Login</button>  
+          </div>
+        </form>
+        {% endblock %}
+        
+        </div>
+    </body>
+</html><!DOCTYPE html>
+
+{% extends "index.html" %}
+
+  {% block content %}
+  <h1>El Table Menu Items</h1>
+  <p><strong>Please Select 1 or More Menu Items to Add to Order</strong></p>
+  <div class="main">
+    <div class="container">
+      <form action="{{url_for('cart')}}" method="POST">  
+          {% for item in items %}
+            {% if item.kind == "sandwich" %}
+              <!--<div class="filterDiv sandwiches">-->
+                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
+              <!--</div>-->
+            {% elif item.kind == "drink" %}
+              <!--<div class="filterDiv drinks">-->
+                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
+              <!--</div>-->
+            {% elif item.kind == "candy" %}
+              <!--<div class="filterDiv candies">-->
+                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
+              <!--</div>-->
+            {% elif item.kind == "snack" %}
+              <!--<div class="filterDiv snacks">-->
+                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
+              <!--</div>-->
+            {% endif %}
+          {% endfor %}
+          <br><button type="submit">Add To Cart!</button>
+      </form>
+    </div>
+  </div>
+  {% endblock %}
+<!DOCTYPE html>
+{% extends "index.html" %}
+{% block content %}
+
+    <h1>
+        Make a payment
+    </h1>
+    
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div id="messages">
+        {% for msg in messages %}
+            <h2>{{msg}}</21>
+        {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    
+    <form method="POST" action="">
+    <p><label for="amount">Amount</label>
+        <input type="text" id="amount" name="amount">
+        <select name="method">
+            <option value="" disabled selected>Method</option>
+            <option value="cash">Cash</option>
+            <option value="venmo">Venmo</option>
+        </select>
+        
+        </p>
+    <p><input type="submit" value="Submit"></p>
+    
+    {% if payments %}
+
+    <h2>{{session['username']}}'s Payment history</h2>
+
+    <div id=payments>
+        {% for p in payments %}
+            <p>{{p.dt}}...............{{p.method}}...............{{p.amount}}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+</form>
+    
+{% endblock %}<!DOCTYPE html>
+{% extends "index.html" %}
+
+{% block content %}
+
+<div class="main">
+<h1>{{user.username}}'s Tab Balance: {{user.balanceOwed}}</h1> 
+
+<h2>Recent Orders</h2>
+<p>Click on the order to see details.</p>
+<p><a href="{{url_for('payment', username=user.username)}}">Click here to make a payment and to view recent payments.</a></p>
+</div>
+<div class="center">
+{% for order in orders %}
+<button class="accordion">
+    <table>
+        <tr>
+            <th>{{order.dt}}</th>
+            <th>${{order.total}}</th>
+            <th>{{order.item_num}}</th>
+        </tr>
+    </table>
+</button>
+
+    {% for item in items %}
+<div class="panel">
+    <table>
+        {% if item.oid == order.oid %}
+        <tr>
+            <td>{{item.name}}</td>
+            <td>${{item.item_total}}</td>
+            <td>{{item.quantity}}</td>
+        
+        {% endif %}
+    {% endfor %}
+        </tr>
+
+    </table>
+</div>
+    
+{% endfor %}
+</div>
+<script>
+var acc = document.getElementsByClassName("accordion");
+var i;
+
+for (i = 0; i < acc.length; i++) {
+  acc[i].addEventListener("click", function() {
+    this.classList.toggle("active");
+    var panel = this.nextElementSibling;
+    if (panel.style.maxHeight){
+      panel.style.maxHeight = null;
+    } else {
+      panel.style.maxHeight = panel.scrollHeight + "px";
+    } 
+  });
+}
+</script>
+
+{% endblock %}<!DOCTYPE html>
+{% extends "index.html" %}
+{% block content %}
+    <h1>
+        Shopping Cart
+    </h1>
+  <form action="{{url_for('recent_orders', username=session['username'])}}" method="POST">
+    <div class="shopping-cart">
+      <!-- Title -->
+      <div class="title">
+        {{session['username']}}'s Shopping Bag
+      </div>
+  
+    {% for item in items %}
+        <div class="item">
+        <input type=hidden name="miid" value="{{item.miid}}">
+
+            <div class="buttons">
+              <span class="delete-btn"></span>
+              <span class="like-btn"></span>
+            </div>
+            
+            <div class="description">
+              <span>{{item.name}}</span>
+            </div>
+            
+            <div class="quantity">
+              <button class="minus-btn" type="button" name="button">
+                <img src="{{ url_for('static', filename='minus.svg') }}" alt="" />
+              </button>
+              <input type="text" name="quantity" value="{{item.quantity}}">
+
+              <button class="plus-btn" type="button" name="button">
+                <img src="{{ url_for('static', filename='plus.svg') }}" alt="" />
+              </button>
+            </div>
+        </div>
+    {% endfor %}
+      
+   
+    <button type="submit">Place Order!</button> <!--should 'place order' and add order info to recent orders page-->
+    </form>
+
+     
+      </div>
+    
+{% endblock %}<!DOCTYPE html>
+{% extends "index.html" %}
+
+{% block content %}
+<h1>Search User Tabs</h1>
+<div class='main'>
+
+<input type="text" id="user_search" onkeyup="searchForUser()" placeholder="Search for username" title="Type in a username">
+
+<ul id="users">
+{% for user in users %}
+  <li><a href="{{url_for('recent_orders', username = user.username)}}">{{user.username}}</a></li>
+{% endfor %}
+</ul>
+</div>
+
+<script>
+
+function searchForUser() {
+    var input, filter, ul, li, a, i, txtValue;
+    input = document.getElementById("user_search");
+    filter = input.value;
+    ul = document.getElementById("users");
+    li = ul.getElementsByTagName("li");
+    for (i = 0; i < li.length; i++) {
+        a = li[i].getElementsByTagName("a")[0];
+        txtValue = a.textContent || a.innerText;
+        if (txtValue.indexOf(filter) > -1) {
+            li[i].style.display = "";
+        } else {
+            li[i].style.display = "none";
+        }
+    }
+}
+</script>
+
+{% endblock %}
+body {
+  margin:0;
+  font-family: monospace;
+}
+
+#mbar {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: grey;
+  position: fixed;
+  top: 0;
+  width: 100%;
+}
+
+#lmbar {
+  float: left;
+}
+
+#lmbar a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover:not(.active) {
+  background-color: #111;
+}
+
+.active {
+  background-color: plum;
+}
+
+.btn-group button {
+  background-color: #F4D1FF; 
+  border: 1px solid #DCDCDC; 
+  color: brown; 
+  padding: 10px 24px; 
+  cursor: pointer; 
+  width: 50%; 
+  display: block; 
+}
+
+.btn-group button:not(:last-child) {
+  border-bottom: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.btn-group button:hover {
+  background-color: #9DF9E5;
+}
+
+.accordion {
+  background-color: white;
+  color: grey;
+  cursor: pointer;
+  padding: 18px;
+  margin-left:1em;
+  margin-right:1em;
+  width: 80%;
+  border: 5px solid pink;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
+  transition: 0.4s;
+}
+
+
+.panel {
+  margin-left:1em;
+  margin-right:1em;
+  width: 80%;
+  text-align: center;
+  background-color: lavender;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+}
+
+.center {
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+  padding-top: 5ex;
+}
+
+h1 {
+  padding-top: 5ex;
+}
+
+th {
+  text-align: right;
+  margin-left: 1em;
+  margin-right: 1em;
+  padding-left: 50px;
+  padding-right: 20px;
+}
+
+td {
+  text-align: right;
+  margin: 1em;
+  padding-left: 50px;
+  padding-right: 20px;
+}
+
+#messages { color: red; font-weight: bold; }
+
+* {
+  box-sizing: border-box;
+}
+
+#user_search {
+  background-position: 10px 12px;
+  background-repeat: no-repeat;
+  width: 40%;
+  font-size: 16px;
+  padding: 12px 20px 12px 40px;
+  border: 1px solid #ddd;
+  margin-bottom: 12px;
+}
+
+#users {
+  list-style-type: none;
+  width: 40%;
+  padding: 0;
+  margin: 0;
+}
+
+#users li a {
+  border: 1px solid #ddd;
+  margin-top: -1px; /* Prevent double borders */
+  background-color: #f6f6f6;
+  padding: 12px;
+  text-decoration: none;
+  font-size: 18px;
+  color: black;
+  display: block
+}
+
+#users li a:hover:not(.header) {
+  background-color: #eee;
+}
+
+.filterDiv {
+  float: left;
+  background-color: #2196F3;
+  color: #ffffff;
+  width: 100px;
+  line-height: 100px;
+  text-align: center;
+  margin: 2px;
+  display: none;
+}
+
+.show {
+  display: block;
+}
+
+.container {
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+/* Style the buttons */
+.btn {
+  border: none;
+  outline: none;
+  padding: 12px 16px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #ddd;
+}
+
+.btn.active {
+  background-color: #666;
+  color: white;
+}
