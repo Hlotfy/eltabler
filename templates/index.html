@@ -21,27 +21,39 @@
     <p>{{msg}}</p>
     {% endif %}  
     
-        <ul id="mbar">
-          <li id="lmbar"><a href="{{url_for('recent_orders',username=session['username'])}}">Recent Orders</a></li>
-          <li id="lmbar"><a href="{{url_for('payment',username=session['username'])}}">Payment</a></li>
+    {% if session['staffId'] %}
+    <div class="navbar">
+        
+          <li id="lmbar"><a href="">Inventory</a></li>
+          <li id="lmbar"><a href="">Current Orders</a></li>
           <li id="lmbar"><a href="{{url_for('order', username=session['username'])}}">Menu</a></li>
           <li id="lmbar"><a href="{{url_for('tabs', username=session['username'])}}">User Tabs</a></li>
-          <li id="lmbar"><a href="{{url_for('cart', username=session['username'])}}">Cart</a></li>
-          {% if session['staffId'] %}
-          <form action="{{url_for('staff_logout')}}" method="POST">
-          <li id="lmbar">Signed in as staff: {{session['staffId']}} </li>
-          <button type="submit" id="logout">Staff Logout</button>
-          </form>
-          {% endif %}
           
           {% if session['username'] %}
-          <form action="{{url_for('leave_tab')}}" method="POST">
-          <li id="lmbar">On the tab user: {{session['username']}} </li>
-          <button type="submit" id="logout">Leave Tab</button>
-          </form>
+          
+          <div class="dropdown">
+             <button class="dropbtn" onclick="drop_menu()">{{session['username']}}</a>
+                <i class="fa fa-caret-down"></i>
+              </button>
+               <div class="dropdown-content" id="user_dd">
+                <a href="{{url_for('payment',username=session['username'])}}">Payment</a>
+                <a href="{{url_for('recent_orders',username=session['username'])}}">Recent Orders</a>
+                <a href="{{url_for('cart', username=session['username'])}}">Cart</a>
+                
+                <form id="logout_btn" action="{{url_for('leave_tab')}}" method="POST">
+                    <a href="#" onclick="document.getElementById('logout_btn').submit()">Logout</a>
+                    
+                </form>
+              </div>
+           </div>
           {% endif %}
-        </ul>
-        
+          
+          <form id="staff_logout" action="{{url_for('staff_logout')}}" method="POST">
+            <a href="#" onclick="document.getElementById('staff_logout').submit()">Logout {{session['staffId']}}</a>
+          </form>
+          
+        </div>
+        {% endif %}
         <div id="content", align="center">
         {% block content %}
         <br><br>
@@ -61,5 +73,23 @@
         {% endblock %}
         
         </div>
+        
+  <script>
+    /* When the user clicks on the button, 
+    toggle between hiding and showing the dropdown content */
+    function drop_menu() {
+      document.getElementById("user_dd").classList.toggle("show");
+    }
+    
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function(e) {
+      if (!e.target.matches('.dropbtn')) {
+      var user_dd = document.getElementById("user_dd");
+        if (user_dd.classList.contains('show')) {
+          user_dd.classList.remove('show');
+        }
+      }
+    }
+  </script>
     </body>
 </html>
