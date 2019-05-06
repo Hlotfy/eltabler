@@ -18,7 +18,7 @@ drop table if exists user;
 create table menuItem (
     miid int auto_increment,
     name varchar(30),
-    kind enum('drink','snack','candy','sandwich'),
+    kind enum('drink','snack','candy','sandwich','soup', 'pastry', 'gluten-free'),
     price double,
     quantity int,
     primary key (miid)
@@ -38,7 +38,7 @@ show warnings;
 create table ingredient (
     iid int auto_increment,
     name varchar(30),
-    kind enum('bread', 'meat', 'cheese', 'extra', 'base'),
+    kind enum('bread', 'meat', 'cheese', 'free', '50-cent', '1-dollar', 'base'),
     price double,
     quantity int,
     primary key (iid)

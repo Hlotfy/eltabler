@@ -21,7 +21,30 @@ miid,name,kind,price,instock
 0,Murphys Law,sandwich,4.5,1
 0,Love Snack,sandwich,3.5,1
 0,Sharp n Sweet,sandwich,4.5,1
-0,cheese sandwich,sandwich,3.5,1
-0,meat sandwich,sandwich,4.5,1
-0,meat cheese sandwich,sandwich,5,1
-0,toast,base,1.00,1
+0,Nutella Croissant,sandwich,3,1
+0,The Tenure Track,sandwich,7,1
+0,The Tourist,sandwich,6.5,1
+0,Uh Huh Honey,sandwich,4.5,1
+0,The Vegan,sandwich,5,1
+0,Young Money Millionaire,sandwich,5,1
+0,Rosy Roasty Toasty,sandwich,4.5,1
+0,Make-Your-Own,sandwich,3.5,1
+0,Croissant,pastry,2,1
+0,Scone,pastry,2,1
+0,Muffin,pastry,2,1
+0,Cookie,pastry,0.75,1
+0,Coffee,drink,0.75,1
+0,Tea,drink,0.5,1
+0,Chai Latte,drink,2.75,1
+0,Hot Chocolate,drink,2,1
+0,Hot Apple Cider,drink,2,1
+0,Tomato & Roasted Red Pepper,soup,2,1
+0,Butternut Squash,soup,2,1
+0,Black Bean,soup,2,1
+0,Carrot Ginger,soup,2,1
+0,Sweet Potato Bisque,soup,2,1
+0,Tomato,soup,2,1
+0,Mini Quesadilla,gluten-free,2,1
+0,DeSombre Side Salad,gluten-free,3.5,1
+0,Macintyre Side Salad,gluten-free,3.5,1
+0,Hansu Side Salad,gluten-free,3.5,1

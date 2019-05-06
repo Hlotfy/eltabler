@@ -1,47 +1,50 @@
 iid,name,kind,price,instock
-0,sourdough,bread,0,1
-0,wheat,bread,0,1
-0,multigrain,bread,0,1
-0,rye,bread,0,1
-0,rosemary garlic,bread,0,1
-0,bagel,bread,0.5,1
-0,croissant,bread,0.5,1
-0,provolone,cheese,0,1
-0,cheddar,cheese,0,1
-0,muenster,cheese,0,1
-0,swiss,cheese,0,1
-0,goat,cheese,0.5,1
-0,brie,cheese,0.5,1
-0,bacon,meat,0,1
-0,ham,meat,0,1
-0,turkey,meat,0,1
-0,greens,extra,0,1
-0,tomato,extra,0,1
-0,mayonnaise,extra,0,1
-0,mustard,extra,0,1
-0,dijon,extra,0,1
-0,hot sauce,extra,0,1
-0,sriracha,extra,0,1
-0,butter,extra,0,1
-0,honey,extra,0,1
-0,sun-dried tomatoes,extra,0.5,1
-0,roasted red peppers,extra,0.5,1
-0,pesto,extra,0.5,1
-0,artichoke tapenade,extra,0.5,1
-0,olive tapenade,extra,0.5,1
-0,apple,extra,0.5,1
-0,fig jam,extra,0.5,1
-0,strawberry jam,extra,0.5,1
-0,peanut butter,extra,0.5,1
-0,cream cheese,extra,0.5,1
-0,hummus,extra,0.5,1
-0,pepper jelly,extra,0.5,1
-0,walnuts,extra,0.5,1
-0,cranberry sauce,extra,0.5,1
-0,avocado,extra,1,1
-0,nutella,extra,1,1
-0,cookie butter,extra,1,1
+0,sourdough,bread,1,1
+0,wheat,bread,1,1
+0,multigrain,bread,1,1
+0,rye,bread,1,1
+0,rosemary garlic,bread,1,1
+0,bagel,bread,1.5,1
+0,croissant,bread,1.5,1
+0,provolone,cheese,1.5,1
+0,cheddar,cheese,1.5,1
+0,muenster,cheese,1.5,1
+0,swiss,cheese,1.5,1
+0,goat,cheese,2,1
+0,brie,cheese,2,1
+0,bacon,meat,1.5,1
+0,ham,meat,1.5,1
+0,turkey,meat,1.5,1
+0,greens,free,0,1
+0,tomato,free,0,1
+0,mayonnaise,free,0,1
+0,mustard,free,0,1
+0,dijon,free,0,1
+0,hot sauce,free,0,1
+0,sriracha,free,0,1
+0,butter,free,0,1
+0,honey,free,0,1
+0,sun-dried tomatoes,50-cent,0.5,1
+0,roasted red peppers,50-cent,0.5,1
+0,pesto,50-cent,0.5,1
+0,artichoke hearts,50-cent,0.5,1
+0,apple,50-cent,0.5,1
+0,fig jam,50-cent,0.5,1
+0,strawberry jam,50-cent,0.5,1
+0,peanut butter,50-cent,0.5,1
+0,cream cheese,50-cent,0.5,1
+0,hummus,50-cent,0.5,1
+0,pepper jelly,50-cent,0.5,1
+0,walnuts,50-cent,0.5,1
+0,cranberry sauce,50-cent,0.5,1
+0,avocado,1-dollar,1,1
+0,nutella,1-dollar,1,1
+0,cookie butter,1-dollar,1,1
 0,cheese sandwich,base,3.5,1
-0,meat sandwich,base,4.5,1
+0,meat sandwich,base,3.5,1
 0,meat cheese sandwich,base,5,1
-0,toast,base,1,1
+0,bread only sandwich,base,2,1
+0,open-faced,base,1,1
+0,salt,free,0,1
+0,pepper,free,0,1
+0,tortilla,bread,0.5,1
