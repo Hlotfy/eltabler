@@ -12,25 +12,33 @@ app.secret_key = 'asdflsgflawiewurhe'
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
-conn = functions.getConn('tabtracker')
 
 @app.route('/')
 # the index page of the app, which includes the staff login form
 def index():
+    conn = functions.getConn('tabtracker')
     return render_template('index.html')
 
 @app.route('/staff_login',  methods = ['POST'])
 # route which processes the staff login and adds the username to the session
 def staff_login():
-    form = request.form
-    print form
+    conn = functions.getConn('tabtracker')
+    #form = request.form
+    #print form
     staffId = request.form['staffId']
-    session['staffId'] = staffId
-    return redirect(url_for('tabs'))
+    isStaff = functions.login(conn,staffId)
+    if isStaff:
+        session['staffId'] = staffId
+        flash("login successful! welcome ", staffId)
+        return redirect(url_for('tabs'))
+    else:
+        flash("login unsuccessful!")
+        return redirect(url_for('index'))
     
 @app.route('/staff_logout', methods = ['POST'])
 # rotue which processes the staff logout and removes the username from the session
 def staff_logout():
+    conn = functions.getConn('tabtracker')
     session.pop('staffId')
     print "Logging Out of Staff Account"
     return redirect(url_for('index'))
@@ -38,18 +46,21 @@ def staff_logout():
 @app.route('/tabs/')
 # route which renders the user tabs page which all current usernames
 def tabs():
+    conn = functions.getConn('tabtracker')
     users = functions.getAllUsers(conn)
     return render_template('userTabs.html', users=users)
     
 @app.route('/menu/', methods = ['POST', 'GET'])
 #route which renders the menu page which all current menu items
 def order():
+    conn = functions.getConn('tabtracker')
     items = functions.getAllMenuItems(conn)
     return render_template('order_form.html', items=items)
 
 @app.route('/access_tab', methods = ['POST'])
 # route which processes access to the selected user's tab, adding the username to the session and creating a sesion id for the session
 def access_tab(username):
+    conn = functions.getConn('tabtracker')
     sessId = functions.newSession(conn,username)
     session['username'] = username
     session['sessId'] = sessId
@@ -62,6 +73,7 @@ def access_tab(username):
 
 @app.route('/leave_tab', methods = ['POST'])
 def leave_tab():
+    conn = functions.getConn('tabtracker')
     session.pop('username')
     print "leaving user tab!"
     return redirect(url_for('tabs'))
@@ -71,16 +83,18 @@ def leave_tab():
 # add safeguard so you don't create an order with no order items
 # delete orders with no order items
 def recent_orders(username):
+    conn = functions.getConn('tabtracker')
     access_tab(username)
     if request.method == 'POST':
         form = request.form
         if form:
-            form = form.to_dict(flat=False)['miid']
+            form = form['miid']
             print form
             functions.addOrder(conn,form,username)
             orders = functions.getRecentOrders(conn,username)
             items = functions.getOrderItems(conn,username)
             user = functions.getUser(conn,username)
+            clearCart()
             return render_template('recent_orders.html',orders=orders, items=items, user=user)
         else:
             return redirect(request.referrer)
@@ -93,6 +107,7 @@ def recent_orders(username):
 @app.route('/cart/', methods=['GET','POST'])
 # keeps track of all selected menu items for current session and renders cart template
 def cart():
+    conn = functions.getConn('tabtracker')
     cart  = session['cart']
     if request.method == 'POST':
         cart  = session['cart']
@@ -109,11 +124,18 @@ def cart():
         return jsonify(item)
     
     return render_template('shopping_cart_page.html')
+    
+@app.route('/clearCart', methods=['POST'])
+def clearCart():
+    conn = functions.getConn('tabtracker')
+    menu = functions.getAllMenuItems(conn)
+    session['cart'] = {item['name']:0 for item in menu}
+    return redirect(request.referrer)
 
 @app.route('/<username>/payment/', methods=['GET','POST'])
 # accesses payment history for selected user and allows payments to be made to user's tab balance
 def payment(username):
-    
+    conn = functions.getConn('tabtracker')
     if request.method == 'GET':
         payments = functions.getRecentPayments(conn,username)
         return render_template('payment_page.html', payments=payments, user=username)
