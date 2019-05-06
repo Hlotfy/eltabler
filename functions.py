@@ -43,6 +43,11 @@ def getAllMenuItems(conn):
     curs.execute('select * from menuItem;')
     return curs.fetchall()
 
+def getMenuItem(conn,miid):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from menuItem where miid=%s',(miid,))
+    return curs.fetchone()
+
 # Gets the ingredients of a given menu item
 def getIngredients(conn, menuItemId):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)

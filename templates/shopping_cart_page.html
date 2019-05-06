@@ -11,9 +11,10 @@
         {{session['username']}}'s Shopping Bag
       </div>
   
-    {% for item in items %}
+    {% for item in session['cart'] %}
+      {% if session['cart'][item] > 0 %}
         <div class="item">
-        <input type=hidden name="miid" value="{{item.miid}}">
+        <input type=hidden name="miid" value="{{session['cart'][item]}}">
 
             <div class="buttons">
               <span class="delete-btn"></span>
@@ -21,20 +22,21 @@
             </div>
             
             <div class="description">
-              <span>{{item.name}}</span>
+              <span>{{item}}</span>
             </div>
             
             <div class="quantity">
               <button class="minus-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='minus.svg') }}" alt="" />
               </button>
-              <input type="text" name="quantity" value="{{item.quantity}}">
+              <input type="text" name="quantity" value="{{session['cart'][item]}}">
 
               <button class="plus-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='plus.svg') }}" alt="" />
               </button>
             </div>
         </div>
+    {% endif %}
     {% endfor %}
       
    

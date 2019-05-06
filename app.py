@@ -53,6 +53,10 @@ def access_tab(username):
     sessId = functions.newSession(conn,username)
     session['username'] = username
     session['sessId'] = sessId
+    menu = functions.getAllMenuItems(conn)
+    session['cart'] = {item['name']:0 for item in menu}
+    cart = session['cart']
+    print cart
     print "accessing the tab of " + session['username'] + "!"
     return redirect(url_for('recent_orders', username=session['username']))
 
@@ -89,18 +93,22 @@ def recent_orders(username):
 @app.route('/cart/', methods=['GET','POST'])
 # keeps track of all selected menu items for current session and renders cart template
 def cart():
-    form = request.form
-    if not form:
-        items = functions.getCart(conn,session['username'])
-        if not items:
-            return redirect(url_for('order'))
-        user = functions.getUser(conn,session['username'])
-        return render_template('shopping_cart_page.html', items = items, user = user)
-    form = form.to_dict(flat=False)['miid']
-    functions.addToCart(conn,form,session['username'])
-    items = functions.getCart(conn,session['username'])
-    user = functions.getUser(conn,session['username'])
-    return render_template('shopping_cart_page.html', items = items, user = user)
+    cart  = session['cart']
+    if request.method == 'POST':
+        cart  = session['cart']
+        print session['cart']
+        form = request.form.to_dict(flat=True)
+        print form
+        miid = request.form.get('miid')
+        name = request.form.get('name')
+        price = request.form.get('price')
+        cart[name] += 1
+        print name, cart[name]
+        item = functions.getMenuItem(conn,miid)
+        session['cart'] = cart
+        return jsonify(item)
+    
+    return render_template('shopping_cart_page.html')
 
 @app.route('/<username>/payment/', methods=['GET','POST'])
 # accesses payment history for selected user and allows payments to be made to user's tab balance

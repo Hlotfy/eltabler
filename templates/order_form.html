@@ -1,34 +1,122 @@
 <!DOCTYPE html>
 
+
 {% extends "index.html" %}
 
   {% block content %}
   <h1>El Table Menu Items</h1>
   <p><strong>Please Select 1 or More Menu Items to Add to Order</strong></p>
   <div class="main">
-    <div class="container">
-      <form action="{{url_for('cart')}}" method="POST">  
+    <div class="container" id="menuItems">
+      <form action="{{url_for('cart')}}" method="GET"> 
+      <table id="menuItems">
+        <tr>
+          <th>Item</th>
+        </tr>
           {% for item in items %}
             {% if item.kind == "sandwich" %}
               <!--<div class="filterDiv sandwiches">-->
-                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
+               <tr miid={{item.miid}}>
+               <td class="name">{{item.name}}</td>
+               <td class="price">{{item.price}}</td>
+               <td>
+                   <!--<form action="{{url_for('cart')}}" method="GET">-->
+                  <!--<input type="hidden" name="miid" value="{{item.miid}}">-->
+                  <input type="checkbox" id="cb" value={{item.miid}}></input>
+               </td>
+                </tr>
+                <!--<input type=hidden name="name" value="{{item.name}}">-->
               <!--</div>-->
             {% elif item.kind == "drink" %}
+               <tr miid={{item.miid}}>
+               <td class="name">{{item.name}}</td>
+               <td class="price">{{item.price}}</td>
+               <td>
+                   <!--<form action="{{url_for('cart')}}" method="GET">-->
+                  <!--<input type="hidden" name="miid" value="{{item.miid}}">-->
+                  <input type="checkbox" id="cb" value={{item.miid}}></input>
+               </td>
+                </tr>
               <!--<div class="filterDiv drinks">-->
-                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
+                <!--<input type="checkbox" onclick="checkItem()" id="item" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>-->
+                <!--<input type=hidden name="name" value="{{item.name}}">-->
               <!--</div>-->
             {% elif item.kind == "candy" %}
+              <!----> 
+              <tr miid={{item.miid}}>
+               <td class="name">{{item.name}}</td>
+               <td class="price">{{item.price}}</td>
+               <td>
+                   <!--<form action="{{url_for('cart')}}" method="GET">-->
+                  <!--<input type="hidden" name="miid" value="{{item.miid}}">-->
+                  <input type="checkbox" id="cb" value={{item.miid}}></input>
+               </td>
+                </tr>
               <!--<div class="filterDiv candies">-->
-                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
+                <!--<input type="checkbox" onclick="checkItem()" id="item" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>-->
+                <!--<input type=hidden name="name" value="{{item.name}}">-->
               <!--</div>-->
             {% elif item.kind == "snack" %}
+              <tr miid={{item.miid}}>
+               <td class="name">{{item.name}}</td>
+               <td class="price">{{item.price}}</td>
+               <td><form action="{{url_for('cart')}}" method="GET">
+                  <!--<input type="hidden" name="miid" value="{{item.miid}}">-->
+                  <input type="checkbox" id="cb" value="{{item.miid}}"></input>
+               </td>
+                </tr>
               <!--<div class="filterDiv snacks">-->
-                <input type="checkbox" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>
+                <!--<input type="checkbox" onclick="checkItem()" id="item" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>-->
+                <!--<input type=hidden name="name" value="{{item.name}}">-->
               <!--</div>-->
             {% endif %}
           {% endfor %}
-          <br><button type="submit">Add To Cart!</button>
+          </table>
+     
+      <br><button type="submit">Checkout!</button>
       </form>
     </div>
   </div>
+<script>
+  
+/* global $ */
+
+var URL = "{{url_for('cart')}}";
+
+  $("#menuItems").on(
+    "click", "input[type=checkbox]",
+    function(event) {
+      var name = $(this).closest("tr").find(".name").text();
+      var price = $(this).closest("tr").find(".price").text();
+      console.log(name)
+      var miid = $(this).val();
+      console.log($(this))
+      $.post(URL,{'miid':miid, 'name':name, 'price':price},function(resp) { 
+                var name = resp.name;
+                var price = resp.price;
+                $("#[miid=" + resp.miid +"]").find(".name").css('font-weight','bold').text(name+" found");
+            },
+            'json');
+      
+    });
+      
+  function addToCartAjax(miid) {
+    console.log("Sending "+miid+" to the back end");
+    $.get(URL,{'miid':miid},function(resp) { 
+                var name = resp.name;
+                var price = resp.price;
+                $("#[miid=" + resp.miid +"]").find(".name").text(name+" found");
+            },
+            'json');
+  }
+    
+  function validateCart(obj) {
+    console.log(obj);
+        // $("<li>")
+        //     .attr("cart_total",obj)
+        //     .text("item added to cart")
+        //     .appendTo("#navbar");
+  }
+
+  </script>
   {% endblock %}
