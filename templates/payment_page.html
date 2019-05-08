@@ -2,6 +2,7 @@
 {% extends "index.html" %}
 {% block content %}
 
+    <div id="errors"></div>
     <h1>
         Make a payment
     </h1>
@@ -19,23 +20,55 @@
     <form method="POST" action="">
     <p><label for="amount">Amount</label>
         <input type="text" id="amount" name="amount">
-        <select name="method">
+        <select id="method" name="method">
             <option value="" disabled selected>Method</option>
             <option value="cash">Cash</option>
             <option value="venmo">Venmo</option>
         </select>
         
         </p>
-    <p><input type="submit" value="Submit"></p>
+    <p><input type="submit" id="submit-btn" value="Submit"></p>
     
     {% if payments %}
 
     <h2>{{session['username']}}'s Payment history</h2>
 
     <div id=payments>
-        {% for p in payments %}
-            <p>{{p.dt}}...............{{p.method}}...............{{p.amount}}</p>
-        {% endfor %}
+    {% for p in payments %}
+    <p>{{p.dt}}...............{{p.method}}...............{{p.amount}}</p>
+    {% endfor %}
+    <script>
+    /* global $ */
+        
+        var url = "{{url_for('payment',username='elennonj')}}";
+        
+        function addPayment(obj){
+            if(obj.error) {
+                $("#errors").empty().html('Error: '+obj.err);
+            } else {
+                $("<p>")
+                    .text(obj.dt+"..............."+obj.method+"..............."+obj.amount)
+                    .appendTo("#payments");
+            }
+        }
+        
+        $("#submit-btn").on("click", function (event) {
+            event.preventDefault();  // prevent default form submission
+            var method = $("#method").val();
+            var amt = $("#amount").val();
+            // convert the current datetime to something useable by the database
+            var dt = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            console.log("dt: " + dt);
+            sendPayment(method,amt,dt);
+        });
+            
+        function sendPayment(method,amt,dt){
+            console.log("Sending payment with method: " + method + " and amount: $" + amt + " at " + dt);
+            $.post(url, {'method':method,'amount':amt},addPayment);
+        }
+    </script>
+    
+        
     </div>
     {% endif %}
 </form>
