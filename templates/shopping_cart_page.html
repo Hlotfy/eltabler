@@ -11,39 +11,85 @@
         {{session['username']}}'s Shopping Bag
       </div>
   
+  <div class="item">
+    <table id="cartItems">
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
     {% for item in session['cart'] %}
-      {% if session['cart'][item] > 0 %}
-        <div class="item">
-        <input type=hidden name="miid" value="{{session['cart'][item]}}">
+    
 
-            <div class="buttons">
-              <span class="delete-btn"></span>
-              <span class="like-btn"></span>
-            </div>
+        <tr miid={{item}}>
+          {{item}}
+          
+          <!--<td></td>-->
+           <!--<div class="buttons">-->
+           <!--   <span class="delete-btn"></span>-->
+           <!--   <span class="like-btn"></span>-->
+           <!-- </div>-->
             
-            <div class="description">
-              <span>{{item}}</span>
-            </div>
-            
-            <div class="quantity">
+          <td class="description">{{session['cart'][item]['name']}}</td>
+          <!--<td></td>-->
+          
+          <!--<td></td>-->
+          <!--<td></td>-->
+        </tr>
+        
+        <tr class="quantity">
+          <!--<td></td>-->
+          
+          <td>
               <button class="minus-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='minus.svg') }}" alt="" />
               </button>
-              <input type="text" name="quantity" value="{{session['cart'][item]}}">
-
-              <button class="plus-btn" type="button" name="button">
+            <input type="hidden" id="miid" name="miid" value="{{item}}">
+            <input type="text" id="quantity" name="quantity" value="{{session['cart'][item]['quantity']}}">
+            <button class="plus-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='plus.svg') }}" alt="" />
               </button>
-            </div>
-        </div>
-    {% endif %}
+            
+        </td>
+        <td class ="price">$ {{session['cart'][item]['price']}}</td>
+        </tr>
+        </div>   
+            
+            
+              
+
+             
     {% endfor %}
       
-   
-    <button type="submit">Place Order!</button> <!--should 'place order' and add order info to recent orders page-->
+    </table>
+    <br><button type="submit">Place Order!</button> <!--should 'place order' and add order info to recent orders page-->
+    
+    
     </form>
 
      
       </div>
+      
+      <script type="text/javascript" src="">
+      
+      /* global $ */
+      var URL = "{{url_for('cart')}}";
+
+      document.getElementById("cartItems").onload = function(event){
+          var miid = $(this).find("#miid").val();
+          console.log()
+          // var price = $(this).closest("tr").find(".price").text();
+          // console.log(name)
+          // var miid = $(this).val();
+          console.log($(this))
+          $.post(URL,{'miid':miid},function(resp) { 
+                    // var name = resp.name;
+                    // var price = resp.price;
+                    $("#[miid=" + resp.miid +"]").find(".description").text(resp.name);
+                    $("#[miid=" + resp.miid +"]").find(".price").text(resp.price);
+                },
+                'json');
+          
+        };
+      </script>
     
 {% endblock %}

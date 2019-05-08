@@ -2,9 +2,10 @@
 
 from flask import (Flask, render_template, make_response, url_for, request,
                    redirect, flash, session, send_from_directory, jsonify)
-#from werkzeug import secure_filename
+#from werkzeug imdport secure_filename
 app = Flask(__name__)
 
+from datetime import timedelta
 import sys,os,random,functions
 from werkzeug.datastructures import ImmutableMultiDict
 
@@ -12,6 +13,11 @@ app.secret_key = 'asdflsgflawiewurhe'
 
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
+
+# @app.before_request
+# def make_session_permanent():
+#     session.permanent = True
+#     app.permanent_session_lifetime = timedelta(minutes=1)
 
 @app.route('/')
 # the index page of the app, which includes the staff login form
@@ -46,6 +52,8 @@ def staff_logout():
 @app.route('/tabs/')
 # route which renders the user tabs page which all current usernames
 def tabs():
+    if session.get('username'):
+        print leave_tab()
     conn = functions.getConn('tabtracker')
     users = functions.getAllUsers(conn)
     return render_template('userTabs.html', users=users)
@@ -60,12 +68,13 @@ def order():
 @app.route('/access_tab', methods = ['POST'])
 # route which processes access to the selected user's tab, adding the username to the session and creating a sesion id for the session
 def access_tab(username):
+    print username
     conn = functions.getConn('tabtracker')
-    sessId = functions.newSession(conn,username)
+    #sessId = functions.newSession(conn,username)
     session['username'] = username
-    session['sessId'] = sessId
+    #session['sessId'] = sessId
     menu = functions.getAllMenuItems(conn)
-    session['cart'] = {item['name']:0 for item in menu}
+    session['cart'] = {}
     cart = session['cart']
     print cart
     print "accessing the tab of " + session['username'] + "!"
@@ -74,8 +83,9 @@ def access_tab(username):
 @app.route('/leave_tab', methods = ['POST'])
 def leave_tab():
     conn = functions.getConn('tabtracker')
-    session.pop('username')
-    print "leaving user tab!"
+    if session.get('username'):
+        session.pop('username')
+        print "leaving user tab!"
     return redirect(url_for('tabs'))
 
 @app.route('/<username>/recent_orders/',  methods = ['POST', 'GET'])
@@ -84,12 +94,16 @@ def leave_tab():
 # delete orders with no order items
 def recent_orders(username):
     conn = functions.getConn('tabtracker')
-    access_tab(username)
+    if not session.get('username'):
+        access_tab(username)
     if request.method == 'POST':
-        form = request.form
+        
+        form = request.form.to_dict(flat=False)
         if form:
-            form = form['miid']
             print form
+            form = [{form.keys()[j]: form.values()[j][i] for j in range(len(form))} for i in range(len(form.values()[0]))]
+            print form
+            
             functions.addOrder(conn,form,username)
             orders = functions.getRecentOrders(conn,username)
             items = functions.getOrderItems(conn,username)
@@ -112,16 +126,24 @@ def cart():
     if request.method == 'POST':
         cart  = session['cart']
         print session['cart']
-        form = request.form.to_dict(flat=True)
-        print form
+        # form = request.form[0] #.to_dict(flat=True)
+        # print form
         miid = request.form.get('miid')
-        name = request.form.get('name')
-        price = request.form.get('price')
-        cart[name] += 1
-        print name, cart[name]
+        # name = request.form.get('name')
+        # price = request.form.get('price')
         item = functions.getMenuItem(conn,miid)
+        if miid in cart:
+            cart[miid]['quantity'] += 1
+        else:
+            cart[miid] = item
+        print cart
+        # item = functions.getMenuItem(conn,miid)
         session['cart'] = cart
         return jsonify(item)
+    # else:
+        # cartCont = {}
+        # for item in session['cart']:
+        #     cartCont[item] = functions
     
     return render_template('shopping_cart_page.html')
     
@@ -129,7 +151,7 @@ def cart():
 def clearCart():
     conn = functions.getConn('tabtracker')
     menu = functions.getAllMenuItems(conn)
-    session['cart'] = {item['name']:0 for item in menu}
+    session['cart'] = {}
     return redirect(request.referrer)
 
 @app.route('/<username>/payment/', methods=['GET','POST'])

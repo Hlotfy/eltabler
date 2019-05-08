@@ -8,27 +8,13 @@
   {% endblock %}
     <body>
     
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <div id="messages">
-        {% for msg in messages %}
-            <p>{{msg}}</p>
-        {% endfor %}
-        </div>
-    {% endif %}
-    {% endwith %}
-    
-    {% if msg %}
-    <p>{{msg}}</p>
-    {% endif %}  
-    
     {% if session['staffId'] %}
     <div class="navbar">
         
           <li id="lmbar"><a href="">Inventory</a></li>
           <li id="lmbar"><a href="">Current Orders</a></li>
           <li id="lmbar"><a href="{{url_for('order', username=session['username'])}}">Menu</a></li>
-          <li id="lmbar"><a href="{{url_for('tabs', username=session['username'])}}">User Tabs</a></li>
+          <li id="lmbar"><a href="{{url_for('tabs')}}">User Tabs</a></li>
           
           {% if session['username'] %}
           
@@ -43,7 +29,6 @@
                 
                 <form id="logout_btn" action="{{url_for('leave_tab')}}" method="POST">
                     <a href="#" onclick="document.getElementById('logout_btn').submit()">Logout</a>
-                    
                 </form>
               </div>
            </div>
@@ -55,6 +40,21 @@
           
         </div>
         {% endif %}
+        
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div id="messages">
+            {% for msg in messages %}
+                <p>{{msg}}</p>
+            {% endfor %}
+            </div>
+        {% endif %}
+        {% endwith %}
+        
+        {% if msg %}
+        <p>{{msg}}</p>
+        {% endif %}  
+        
         <div id="content", align="center">
         {% block content %}
         <br><br>

@@ -90,11 +90,11 @@ def addOrder(conn,form,username):
     conn.commit()
     return getRecentOrders(conn,username)
  
-#adds each individual order item to orderItem
-def addOrderItems(conn,form,oid):
+# adds each individual order item to orderItem
+def addOrderItems(conn,item,oid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    print form
-    curs.execute('insert into orderItem(oid,miid,quantity) values(%s,%s,1)',(oid,form))
+    print item
+    curs.execute('insert into orderItem(oid,miid,quantity) values(%s,%s,%s)',(oid,item['miid'],item['quantity']))
     conn.commit()
     return True
     
@@ -125,6 +125,7 @@ def newSession(conn,username):
     return curs.fetchone()
 
 # adds the selected menu items to the cart table
+# i think we won't be needing a cart table anymore but we'll see
 def addToCart(conn,form,username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select max(sid) from session where username = %s',(username,))
