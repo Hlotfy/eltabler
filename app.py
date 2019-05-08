@@ -160,6 +160,7 @@ def payment(username):
     conn = functions.getConn('tabtracker')
     if request.method == 'GET':
         payments = functions.getRecentPayments(conn,username)
+            
         return render_template('payment_page.html', payments=payments, user=username)
         
     else: #method must be 'POST'
@@ -171,20 +172,26 @@ def payment(username):
             # convert to float to type check and to insert into database
             amount = float(amount)
         except ValueError:
-            flash("Please enter an number.")
-            return render_template("payment_page.html")
+            return jsonify({'error':True, 'err':"Please enter an number."})
             
         # make sure the employee enters a payment method
         if method == None:
-            flash("Please select a payment method.")
-            return render_template("payment_page.html")
+            return jsonify({'error':True, 'err': "Please select a payment method."})
             
         #calculates the user's new balance and updates the database
         newBalance = functions.makePayment(conn,username,method,amount)
         name = functions.getUser(conn,username)['name']
         flash(name + " made a payment of $" + str(amount) + " using " + method + ". Their new balance is $" + str(newBalance) + ".")
         payments = functions.getRecentPayments(conn,username)
-        return render_template('payment_page.html', payments=payments, user=username)
+
+        try:
+            method=request.form.get('method')
+            amount=request.form.get('amount')
+            print(method,amount)
+            return jsonify({'error':False,'method':method,'amount':amount,})
+        except Exception as err:
+            return jsonify({'error':True, 'err':str(err)})
+        
                            
 if __name__ == '__main__':
     app.debug = True
