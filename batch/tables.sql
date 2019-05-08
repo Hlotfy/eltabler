@@ -121,21 +121,8 @@ create table session (
     foreign key (username) references user (username)
 );
 
-create table cart (
-    sid int,
-    miid int,
-    quantity int,
-    foreign key (sid) references session (sid),
-    foreign key (miid) references menuItem (miid),
-    primary key (sid,miid)
-);
-
-
 insert into user(name, username, balanceOwed)
-values ("Hala Lotfy", "hlotfy", 0.00), 
-       ("Dee Dee Lennon-Jones", "elennonj", 0.00), 
-       ("Mona Kashyap", "mkashyap", 0.00), 
-       ("Aliza Camacho", "acamacho", 0.00);
+values ("Mona Kashyap", "mkashyap", 0.00);
        
 insert into staff(username) values ("hlotfy"),("elennonj"),("mkashyap"),("acamacho");
        

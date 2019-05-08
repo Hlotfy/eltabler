@@ -75,8 +75,6 @@ def access_tab(username):
     #session['sessId'] = sessId
     menu = functions.getAllMenuItems(conn)
     session['cart'] = {}
-    cart = session['cart']
-    print cart
     print "accessing the tab of " + session['username'] + "!"
     return redirect(url_for('recent_orders', username=session['username']))
 
@@ -97,7 +95,6 @@ def recent_orders(username):
     if not session.get('username'):
         access_tab(username)
     if request.method == 'POST':
-        
         form = request.form.to_dict(flat=False)
         if form:
             print form
@@ -126,24 +123,15 @@ def cart():
     if request.method == 'POST':
         cart  = session['cart']
         print session['cart']
-        # form = request.form[0] #.to_dict(flat=True)
-        # print form
         miid = request.form.get('miid')
-        # name = request.form.get('name')
-        # price = request.form.get('price')
         item = functions.getMenuItem(conn,miid)
         if miid in cart:
             cart[miid]['quantity'] += 1
         else:
             cart[miid] = item
         print cart
-        # item = functions.getMenuItem(conn,miid)
         session['cart'] = cart
         return jsonify(item)
-    # else:
-        # cartCont = {}
-        # for item in session['cart']:
-        #     cartCont[item] = functions
     
     return render_template('shopping_cart_page.html')
     

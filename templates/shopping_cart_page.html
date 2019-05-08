@@ -69,27 +69,27 @@
      
       </div>
       
-      <script type="text/javascript" src="">
+      <!--<script type="text/javascript" src="">-->
       
       /* global $ */
-      var URL = "{{url_for('cart')}}";
+      <!--var URL = "{{url_for('cart')}}";-->
 
-      document.getElementById("cartItems").onload = function(event){
-          var miid = $(this).find("#miid").val();
-          console.log()
+      <!--document.getElementById("cartItems").onload = function(event){-->
+      <!--    var miid = $(this).find("#miid").val();-->
+      <!--    console.log()-->
           // var price = $(this).closest("tr").find(".price").text();
           // console.log(name)
           // var miid = $(this).val();
-          console.log($(this))
-          $.post(URL,{'miid':miid},function(resp) { 
+      <!--    console.log($(this))-->
+      <!--    $.post(URL,{'miid':miid},function(resp) { -->
                     // var name = resp.name;
                     // var price = resp.price;
-                    $("#[miid=" + resp.miid +"]").find(".description").text(resp.name);
-                    $("#[miid=" + resp.miid +"]").find(".price").text(resp.price);
-                },
-                'json');
+      <!--              $("#[miid=" + resp.miid +"]").find(".description").text(resp.name);-->
+      <!--              $("#[miid=" + resp.miid +"]").find(".price").text(resp.price);-->
+      <!--          },-->
+      <!--          'json');-->
           
-        };
-      </script>
+      <!--  };-->
+      <!--</script>-->
     
 {% endblock %}
