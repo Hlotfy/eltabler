@@ -158,15 +158,18 @@ def clearCart():
 # accesses payment history for selected user and allows payments to be made to user's tab balance
 def payment(username):
     conn = functions.getConn('tabtracker')
+    user = functions.getUser(conn,username)
     if request.method == 'GET':
         payments = functions.getRecentPayments(conn,username)
             
-        return render_template('payment_page.html', payments=payments, user=username)
+        return render_template('payment_page.html', payments=payments, user=user)
         
     else: #method must be 'POST'
         #get the payment amount and method
         amount = request.form.get('amount')
         method = request.form.get('method')
+        dt = request.form.get('dt')
+        print "request dt: ", dt
         
         try:
             # convert to float to type check and to insert into database
@@ -175,20 +178,19 @@ def payment(username):
             return jsonify({'error':True, 'err':"Please enter an number."})
             
         # make sure the employee enters a payment method
-        if method == None:
+        if method == '':
             return jsonify({'error':True, 'err': "Please select a payment method."})
             
         #calculates the user's new balance and updates the database
         newBalance = functions.makePayment(conn,username,method,amount)
         name = functions.getUser(conn,username)['name']
-        flash(name + " made a payment of $" + str(amount) + " using " + method + ". Their new balance is $" + str(newBalance) + ".")
         payments = functions.getRecentPayments(conn,username)
 
         try:
             method=request.form.get('method')
             amount=request.form.get('amount')
             print(method,amount)
-            return jsonify({'error':False,'method':method,'amount':amount,})
+            return jsonify({'error':False,'method':method,'amount':amount,'newBalance':newBalance,'user':name,'dt':dt})
         except Exception as err:
             return jsonify({'error':True, 'err':str(err)})
         

@@ -6,16 +6,9 @@
     <h1>
         Make a payment
     </h1>
-    
-    {% with messages = get_flashed_messages() %}
-    {% if messages %}
-        <div id="messages">
-        {% for msg in messages %}
-            <h2>{{msg}}</21>
-        {% endfor %}
-        </div>
-    {% endif %}
-    {% endwith %}
+    <div id="newPaymentInfo">
+        <h2>{{user['username']}}'s tab balance is: ${{user.balanceOwed}}</h2>
+    </div>
     
     <form method="POST" action="">
     <p><label for="amount">Amount</label>
@@ -46,9 +39,16 @@
             if(obj.error) {
                 $("#errors").empty().html('Error: '+obj.err);
             } else {
+                $("#errors").empty();
                 $("<p>")
                     .text(obj.dt+"..............."+obj.method+"..............."+obj.amount)
-                    .appendTo("#payments");
+                    .prependTo("#payments");
+                $("#newPaymentInfo")
+                    .empty();
+                $("<h2>")
+                    .text(obj.user + " made a payment of $" + obj.amount + 
+                                " using " + obj.method + ". Their new balance is $" + obj.newBalance + ".")
+                    .prependTo("#newPaymentInfo");
             }
         }
         
@@ -64,7 +64,7 @@
             
         function sendPayment(method,amt,dt){
             console.log("Sending payment with method: " + method + " and amount: $" + amt + " at " + dt);
-            $.post(url, {'method':method,'amount':amt},addPayment);
+            $.post(url, {'method':method,'amount':amt,'dt':dt},addPayment);
         }
     </script>
     
