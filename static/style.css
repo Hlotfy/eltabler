@@ -255,3 +255,11 @@ td {
 #quantity {
   width:25px;
 }
+
+#newPaymentInfo{
+  color:red;
+}
+
+#errors{
+  color:red;
+}
