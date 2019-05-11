@@ -256,6 +256,12 @@ td {
   width:25px;
 }
 
+#newPaymentInfo{
+  color:red;
+}
+
+#errors{
+  color:red;
 
 /* The side navigation menu */
 .sidenav {
