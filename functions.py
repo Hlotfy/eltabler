@@ -18,13 +18,26 @@ def getConn(db):
 # returns the user's username if they are a staff member, else returns None
 def login(conn,username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select * from staff where username=%s',(username,))
-    user = curs.fetchone()
-    if user is not None:
-        return user['username']
-    else:
-        return None
-        
+    curs.execute('select hashed from staff where username=%s',(username,))
+    return curs.fetchone()
+
+def addStaffMember(conn,username,hashed):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('SELECT username FROM staff WHERE username = %s',
+                     [username])
+    row = curs.fetchone()
+    if row is not None:
+        return False
+    curs.execute('INSERT into staff(username,hashed) \
+                            VALUES(%s,%s) \
+                            on duplicate key update \
+                            hashed = %s',
+                 (username, hashed, hashed))
+    curs.commit()
+    curs.execute('SELECT username FROM staff WHERE username = %s',
+                     [username])
+    return curs.fetchone()
+    
 # gets every user's username and name
 def getAllUsers(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
@@ -47,6 +60,11 @@ def getMenuItem(conn,miid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from menuItem where miid=%s',(miid,))
     return curs.fetchone()
+    
+def getAllIngredients(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from ingredient')
+    return curs.fetchall()
 
 # Gets the ingredients of a given menu item
 def getIngredients(conn, menuItemId):
@@ -123,31 +141,6 @@ def newSession(conn,username):
     conn.commit()
     curs.execute('select max(sid) as "sid" from session')
     return curs.fetchone()
-
-# adds the selected menu items to the cart table
-# i think we won't be needing a cart table anymore but we'll see
-def addToCart(conn,form,username):
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select max(sid) from session where username = %s',(username,))
-    sid = curs.fetchone()
-    for item in form:
-        curs.execute('insert into cart(sid,miid,quantity) values((select max(sid) as "sid" from session where username=%s),%s,1) on duplicate key update quantity = quantity+1',(username,item))
-        conn.commit()
-    curs.execute('select sum(menuItem.price * cart.quantity) as total from session inner join cart on (session.sid=cart.sid) inner join menuItem on (cart.miid=menuItem.miid) where session.username=%s and cart.sid=%s',(username,sid))
-    cartTotal = curs.fetchone()['total']
-    print cartTotal
-    #curs.execute('update user set balanceOwed = balanceOwed + %s',(orderTotal,))
-    #conn.commit()
-    return getCart(conn,username)
-
-# returns content to user's cart for current session
-def getCart(conn,username):
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select max(sid) as "sid" from session where username=%s',(username,))
-    sid = curs.fetchone()["sid"]
-    print sid
-    curs.execute('select menuItem.miid, menuItem.name, menuItem.price, cart.quantity, (menuItem.price * cart.quantity) as "item_total" from cart inner join menuItem on (cart.miid=menuItem.miid) where cart.sid=%s',(sid,))
-    return curs.fetchall()
 
 # for use in short testing
 if __name__ == '__main__':

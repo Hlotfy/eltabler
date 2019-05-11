@@ -2,13 +2,14 @@
 
 from flask import (Flask, render_template, make_response, url_for, request,
                    redirect, flash, session, send_from_directory, jsonify)
-#from werkzeug imdport secure_filename
-app = Flask(__name__)
 
+from werkzeug import secure_filename
 from datetime import timedelta
 import sys,os,random,functions
+import bcrypt
 from werkzeug.datastructures import ImmutableMultiDict
 
+app = Flask(__name__)
 app.secret_key = 'asdflsgflawiewurhe'
 
 # This gets us better error messages for certain common request errors
@@ -23,25 +24,51 @@ app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 # the index page of the app, which includes the staff login form
 def index():
     conn = functions.getConn('tabtracker')
+    if session.get('staffId'):
+        session.pop('staffId')
+    if session.get('username'):
+        session.pop('username')
     return render_template('index.html')
 
-@app.route('/staff_login',  methods = ['POST'])
+@app.route('/add_staff/',  methods = ['POST','GET'])
+def add_staff():
+    conn = functions.getConn('tabtracker')
+    if request.method=='POST':
+        try:
+            staffId = request.form.get('username')
+            password = request.form.get('password')
+            if staffId == functions.getUser(conn, staffId)['username']:
+                return jsonify({'error':True, 'err':"Staff member already exists. Please select Change Password to modify existing staff."})
+            hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            is_added = functions.addStaffMember(conn,staffId,hashed)
+            if is_added:
+                #flash('welcome aboard! successfully added new staff member ' + staffId)
+                return jsonify({'error':False, 'user':staffId})
+        except Exception as err:
+            flash('form submission error '+str(err))
+            return jsonify({'error':True, 'err':err})
+    else:
+        return render_template('add_staff_page.html')
+        
+
+@app.route('/staff_login/',  methods = ['POST'])
 # route which processes the staff login and adds the username to the session
 def staff_login():
     conn = functions.getConn('tabtracker')
-    #form = request.form
-    #print form
     staffId = request.form['staffId']
-    isStaff = functions.login(conn,staffId)
-    if isStaff:
+    passwd = request.form['pwd']
+    row = functions.login(conn,staffId)
+    if row:
+        # hashed = row['hashed']
+        # if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
+        #     flash('successfully logged in as '+staffId)
         session['staffId'] = staffId
-        flash("login successful! welcome ", staffId)
         return redirect(url_for('tabs'))
     else:
-        flash("login unsuccessful!")
+        flash("incorrect login credentials!")
         return redirect(url_for('index'))
     
-@app.route('/staff_logout', methods = ['POST'])
+@app.route('/staff_logout/', methods = ['POST'])
 # rotue which processes the staff logout and removes the username from the session
 def staff_logout():
     conn = functions.getConn('tabtracker')
@@ -62,6 +89,13 @@ def tabs():
 #route which renders the menu page which all current menu items
 def order():
     conn = functions.getConn('tabtracker')
+    if request.method=='POST':
+        miid = request.form.get('miid')
+        ingred = functions.getIngredients(conn,miid)
+        print ingred
+        extra = functions.getAllIngredients(conn)
+        
+        return jsonify({'ingred':ingred, 'extra':extra})
     items = functions.getAllMenuItems(conn)
     return render_template('order_form.html', items=items)
 
@@ -118,12 +152,22 @@ def recent_orders(username):
 @app.route('/cart/', methods=['GET','POST'])
 # keeps track of all selected menu items for current session and renders cart template
 def cart():
+    print session['cart']
     conn = functions.getConn('tabtracker')
     cart  = session['cart']
     if request.method == 'POST':
-        cart  = session['cart']
-        print session['cart']
-        miid = request.form.get('miid')
+        miid=request.form.get('miid')
+        if request.form.get('quantity'):
+            newQuantity=request.form.get('quantity')
+            if int(newQuantity)==0:
+                cart.pop(miid)
+                print "item removed from cart!"
+                session['cart'] = cart
+                return jsonify({'miid':miid,'quantity':True})
+            cart[miid]['quantity'] = newQuantity
+            cq = cart[miid]['quantity']
+            session['cart'] = cart
+            return jsonify({'miid':miid,'quantity':cq})
         item = functions.getMenuItem(conn,miid)
         if miid in cart:
             cart[miid]['quantity'] += 1
