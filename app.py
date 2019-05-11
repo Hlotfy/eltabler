@@ -166,6 +166,7 @@ def cart():
                 return jsonify({'miid':miid,'quantity':True})
             cart[miid]['quantity'] = newQuantity
             cq = cart[miid]['quantity']
+            print cart
             session['cart'] = cart
             return jsonify({'miid':miid,'quantity':cq})
         item = functions.getMenuItem(conn,miid)
