@@ -183,7 +183,7 @@ def cart():
 @app.route('/clearCart', methods=['POST'])
 def clearCart():
     conn = functions.getConn('tabtracker')
-    menu = functions.getAllMenuItems(conn)
+    # menu = functions.getAllMenuItems(conn)
     session['cart'] = {}
     return redirect(request.referrer)
 

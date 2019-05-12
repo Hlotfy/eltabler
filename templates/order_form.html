@@ -111,25 +111,6 @@ var URLm = "{{url_for('order')}}"
       
     });
 
-  function customList(obj){
-    
-    if(obj.error) {
-        $("#errors").empty().html('Error: '+obj.err);
-    } else {
-      // for(var i in obj.ingred){
-       console.log(obj.ingred.name);
-       for(var i in obj.ingred.length){
-        $('#ingredList').prepend('<a href="#" type="button" >'+obj.ingred.name+'</a>');
-    }
-        // $("<a>")
-        //     .attr("price",obj.ingred['price'])
-        //     .text(obj.ingred['name'])
-        //     .appendTo("#ingredList");
-      // }
-    }
-
-  }
-
 /* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
 function openNav(miid) {
   $("#ingredList").empty()
@@ -141,8 +122,9 @@ function openNav(miid) {
                 var ingred = resp.ingred;
                 var extra = resp.extra;
                 console.log(ingred);
-                console.log("yaay!");
                 console.log(extra);
+                // console.log(miid);
+                 $('#ingredList').val(miid)
                 for (var i in ingred){
                   $('#ingredList').prepend('<a href="#" type="button" >'+ingred[i]['name']+'  <input type="checkbox" id="include" kind="'+ingred[i]['kind']+
                   '" value="'+ingred[i]['price']+'" checked>'+   ingred[i]['price']+'</input> </a>');
@@ -153,6 +135,28 @@ function openNav(miid) {
             },
             'json');
 }
+
+ $("#ingredList").on(
+    "click", "input[type=checkbox]",
+    function(event) {
+      var name = $(this).name;
+      var price = $(this).val();
+      var miid = $(this).closest("#ingredList").val();
+      console.log(miid);
+      console.log(price);
+      var oprice = $("#[miid=" + miid +"]").find(".price").css().text();
+      console.log(oprice);
+      var nprice = oprice-price;
+      // $("#menuItems").("#[miid=" + miid +"]").find(".price").text();
+      
+    //   $.post(URL,{'miid':miid, 'name':name, 'price':price},function(resp) { 
+    //             var name = resp.name;
+    //             var price = resp.price;
+    //             $("#[miid=" + resp.miid +"]").find(".name").css('font-weight','bold').text(name+" found");
+    //         },
+    //         'json');
+      
+   });
 
 
 /* Set the width of the side navigation to 0 and the left margin of the page content to 0 */
