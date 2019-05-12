@@ -262,6 +262,11 @@ td {
 
 #errors{
   color:red;
+}
+
+.payments{
+  color:deeppink;
+}
 
 /* The side navigation menu */
 .sidenav {

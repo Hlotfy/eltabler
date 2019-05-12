@@ -7,7 +7,7 @@
         Make a payment
     </h1>
     <div id="newPaymentInfo">
-        <h2>{{user['username']}}'s tab balance is: ${{user.balanceOwed}}</h2>
+        <h2>{{user['name']}}'s tab balance is: ${{user.balanceOwed}}</h2>
     </div>
     
     <form method="POST" action="">
@@ -28,20 +28,25 @@
 
     <div id=payments>
     {% for p in payments %}
-    <p>{{p.dt}}...............{{p.method}}...............{{p.amount}}</p>
+        <p><span class="payments">{{p.dt}}</span>...............<span class="payments">{{p.method}}</span>...............<span class="payments">{{p.amount}}</span>
+        </p>
     {% endfor %}
     <script>
     /* global $ */
         
-        var url = "{{url_for('payment',username='elennonj')}}";
+        var url = "{{url_for('payment',username=session['username'])}}";
         
         function addPayment(obj){
+            $("#errors").empty();
             if(obj.error) {
-                $("#errors").empty().html('Error: '+obj.err);
-            } else {
-                $("#errors").empty();
                 $("<p>")
-                    .text(obj.dt+"..............."+obj.method+"..............."+obj.amount)
+                    .text('Error: '+obj.err)
+                    .prependTo("#errors")
+            } else {
+                $("<p>")
+                    .html("<span class='payments'>"+obj.dt+"</span>"
+                        +"..............."+"<span class='payments'>"+obj.method+"</span>"
+                        +"..............."+"<span class='payments'>"+obj.amount+"</span")
                     .prependTo("#payments");
                 $("#newPaymentInfo")
                     .empty();
