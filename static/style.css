@@ -263,6 +263,11 @@ td {
 #errors{
   color:red;
 }
+
+.payments{
+  color:deeppink;
+}
+
 /* The side navigation menu */
 .sidenav {
   height: 100%; /* 100% Full-height */
