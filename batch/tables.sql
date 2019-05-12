@@ -4,7 +4,6 @@ create database if not exists tabtracker;
 
 use tabtracker;
 -- user table, staff table, user table, menuItem table, payment table, ingredient table, recipe table
-drop table if exists cart;
 drop table if exists orderItem;
 drop table if exists orders;
 drop table if exists recipe;
@@ -83,7 +82,7 @@ IGNORE 1 ROWS;
 
 create table staff (
     username varchar(30),
-    password varchar(30),
+    hashed char(60) not null,
     foreign key (username) references user (username),
     primary key (username)
 );
@@ -114,28 +113,15 @@ create table payments (
     foreign key (username) references user (username)
 );
 
-create table session (
-    sid int auto_increment primary key,
-    st timestamp default current_timestamp,
-    username varchar(30),
-    foreign key (username) references user (username)
-);
+-- create table session (
+--     sid int auto_increment primary key,
+--     st timestamp default current_timestamp,
+--     username varchar(30),
+--     foreign key (username) references user (username)
+-- );
 
-create table cart (
-    sid int,
-    miid int,
-    quantity int,
-    foreign key (sid) references session (sid),
-    foreign key (miid) references menuItem (miid),
-    primary key (sid,miid)
-);
-
-
-insert into user(name, username, balanceOwed)
-values ("Hala Lotfy", "hlotfy", 0.00), 
-       ("Dee Dee Lennon-Jones", "elennonj", 0.00), 
-       ("Mona Kashyap", "mkashyap", 0.00), 
-       ("Aliza Camacho", "acamacho", 0.00);
+-- insert into user(name, username, balanceOwed)
+-- values ("Mona Kashyap", "mkashyap", 0.00);
        
 insert into staff(username) values ("hlotfy"),("elennonj"),("mkashyap"),("acamacho");
        

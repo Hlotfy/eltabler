@@ -1,0 +1,89 @@
+{% extends "index.html" %}
+
+{% block content %}
+<h1>Add New Staff Member Below</h1>
+<input id="changeform" type="button" value="Click Here to Change Staff Member Password">
+
+<div >
+<form id="joinform" style="display:block" method="GET">
+    <h2>Join</h2>
+    <p><label><input type="text" name="username" required pattern="^\w+$"> Username</label></p>
+    <p><label><input type="password" name="password1" required> Password </label></p>
+    <p><label><input type="password" name="password2" required> Password again </label></p>
+    <p><button type="submit">Submit</button></p>
+</form>
+</div>
+<div >
+<form id="changepwdform" style="display:none" method="GET">
+    <h2>Change Staff Member Password</h2>
+    <p><label><input type="text" name="username" required pattern="^\w+$"> Staff Username</label></p>
+    <p><label><input type="password" name="password1" required> New Password </label></p>
+    <p><label><input type="password" name="password2" required> New Password again </label></p>
+    <p><button type="submit">Submit</button></p>
+</form>
+</div>
+
+
+    
+
+
+<script>
+
+/* global $ */
+
+
+$("#changeform").on("click", function(event){  
+    if($("#joinform")[0].style.display === "none") {
+        $("#changepwdform")[0].style.display = "none"; 
+        $("#joinform")[0].style.display = "block"; 
+        $(this).text("Click Here to Change Staff Member Password");
+    }else{
+       if($("#changepwdform")[0].style.display === "none") {
+            $("#joinform")[0].style.display = "none"; 
+            $("#changepwdform")[0].style.display = "block"; 
+            $(this).text("Click Here to Add Staff Member");
+       }
+    }
+    
+});
+// $("#changeform").addEventListener("click",toggle_func);
+// var URL = "{{url_for('add_staff')}}";
+
+$("#joinform").on('submit', function (event) {
+     var usr = $(this).find('[name=username]').val();
+     var pw1 = $(this).find('[name=password1]').val();
+     var pw2 = $(this).find('[name=password2]').val();
+     // should also check for length and common words etc
+     if( pw1 != pw2 ) {
+         // something more sophisticated than alert would be nice
+        //  event.preventDefault();
+         alert("passwords don't match");
+     } else if(pw1.length < 8) {
+        //  event.preventDefault();
+         alert("passwords must be a minimum of 8 characters long");
+     } else {
+               $.post(URL,{'username':usr, 'password': pw1},function(resp) { 
+                var error = resp.error;
+                var username = resp.staffId;
+                if(error === true){
+                    alert("Error: "+error);
+                } else {
+                    alert("The following user was successfully added as a staff member: "+username);
+                }
+                // var price = resp.price;
+                // $("#[miid=" + resp.miid +"]").find(".name").css('font-weight','bold').text(name+" found");
+            },
+            'json');
+     }
+});
+
+
+
+
+
+</script>
+{% endblock %}
+
+
+
+

@@ -19,33 +19,31 @@
       <th></th>
     {% for item in session['cart'] %}
     
+  
 
-        <tr miid={{item}}>
-          {{item}}
-          
           <!--<td></td>-->
            <!--<div class="buttons">-->
            <!--   <span class="delete-btn"></span>-->
            <!--   <span class="like-btn"></span>-->
            <!-- </div>-->
             
-          <td class="description">{{session['cart'][item]['name']}}</td>
+          
           <!--<td></td>-->
           
           <!--<td></td>-->
           <!--<td></td>-->
-        </tr>
         
-        <tr class="quantity">
-          <!--<td></td>-->
-          
+        
+        <tr class="quantity" value={{item}}>
+          <td><input type="hidden" id="miid" name="miid" value="{{item}}"></td>
+          <td><span class="remove-btn" type="button">&times;</span></td>
+          <td class="description">{{session['cart'][item]['name']}}</td>
           <td>
               <button class="minus-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='minus.svg') }}" alt="" />
-              </button>
-            <input type="hidden" id="miid" name="miid" value="{{item}}">
-            <input type="text" id="quantity" name="quantity" value="{{session['cart'][item]['quantity']}}">
-            <button class="plus-btn" type="button" name="button">
+              </button></td>
+            <td><input type="text" id="quantity" name="quantity" value="{{session['cart'][item]['quantity']}}" oninput="changeQuant(this, this.value)"></td>
+            <td><button class="plus-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='plus.svg') }}" alt="" />
               </button>
             
@@ -53,8 +51,7 @@
         <td class ="price">$ {{session['cart'][item]['price']}}</td>
         </tr>
         </div>   
-            
-            
+
               
 
              
@@ -69,27 +66,53 @@
      
       </div>
       
-      <script type="text/javascript" src="">
-      
+      <script>
       /* global $ */
-      var URL = "{{url_for('cart')}}";
-
-      document.getElementById("cartItems").onload = function(event){
-          var miid = $(this).find("#miid").val();
-          console.log()
-          // var price = $(this).closest("tr").find(".price").text();
-          // console.log(name)
-          // var miid = $(this).val();
-          console.log($(this))
-          $.post(URL,{'miid':miid},function(resp) { 
-                    // var name = resp.name;
-                    // var price = resp.price;
-                    $("#[miid=" + resp.miid +"]").find(".description").text(resp.name);
-                    $("#[miid=" + resp.miid +"]").find(".price").text(resp.price);
-                },
-                'json');
-          
-        };
-      </script>
+     
+     var URL = "{{url_for('cart')}}";
+     
+     $(".minus-btn").on("click", function(event){
+      // $(this).closest(".quantity").remove();
+        var miid = $(this).closest(".quantity").find("#miid").val();
+        console.log(miid);
+        
+        var quant = $(this).closest(".quantity").find("input[name='quantity']").val();
+        quant = parseInt(quant,10) - 1;
+       
+        $(this).closest(".quantity").find("input[name='quantity']").val(quant);
+        if(quant===0){
+          $(this).closest(".quantity").remove();
+        }
+        changeQuant(miid,quant);
+     });
+     
+     $(".plus-btn").on("click", function(event){
+        var miid = $(this).closest(".quantity").find("#miid").val();
+        var quant = $(this).closest(".quantity").find("input[name='quantity']").val();
+        quant = parseInt(quant,10) + 1;
+        $(this).closest(".quantity").find("input[name='quantity']").val(quant);
+        changeQuant(miid,quant);
+     });
+     
+    $(".remove-btn").on("click", function(event){
+        var miid = $(this).closest(".quantity").find("#miid").val();
+       $(this).parent().parent().remove(); 
+      // .closest(".quantity").remove();
+       changeQuant(miid,0);
+    });
     
+    $("#quantity").oninput = function() { changeQuant($(this).closest(".quantity").find("#miid").val(),$(this).val()); };
+
+    function changeQuant(miid,quantity) {
+        console.log("changing quantity of "+miid+" to " +quantity);
+        $.post(URL,
+          {'miid': miid, 'quantity':quantity},
+          function(resp){ console.log("new quantity for "+resp.miid+" is "+resp.quantity);
+            
+          });
+      }        
+
+      </script>
+      
+
 {% endblock %}

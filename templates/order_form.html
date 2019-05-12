@@ -4,6 +4,13 @@
 {% extends "index.html" %}
 
   {% block content %}
+  <div id="custombar" class="sidenav">
+                  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+                  <a><ul id="ingredList">included: </ul></a>
+                  <a><ul id="extraList">add ons: </ul></a>
+                  
+                </div>
+  <div id="main">
   <h1>El Table Menu Items</h1>
   <p><strong>Please Select 1 or More Menu Items to Add to Order</strong></p>
   <div class="main">
@@ -16,7 +23,7 @@
           {% for item in items %}
             {% if item.kind == "sandwich" %}
               <!--<div class="filterDiv sandwiches">-->
-               <tr miid={{item.miid}}>
+               <tr value={{item.miid}}>
                <td class="name">{{item.name}}</td>
                <td class="price">{{item.price}}</td>
                <td>
@@ -24,7 +31,10 @@
                   <!--<input type="hidden" name="miid" value="{{item.miid}}">-->
                   <input type="checkbox" id="cb" value={{item.miid}}></input>
                </td>
+               <td><input type="button" id="customMenu" onclick="openNav(this.value)" value={{item.miid}}></button></td>
                 </tr>
+
+
                 <!--<input type=hidden name="name" value="{{item.name}}">-->
               <!--</div>-->
             {% elif item.kind == "drink" %}
@@ -77,11 +87,13 @@
       </form>
     </div>
   </div>
+</div>
 <script>
   
 /* global $ */
 
 var URL = "{{url_for('cart')}}";
+var URLm = "{{url_for('order')}}"
 
   $("#menuItems").on(
     "click", "input[type=checkbox]",
@@ -90,7 +102,6 @@ var URL = "{{url_for('cart')}}";
       var price = $(this).closest("tr").find(".price").text();
       console.log(name)
       var miid = $(this).val();
-      console.log($(this))
       $.post(URL,{'miid':miid, 'name':name, 'price':price},function(resp) { 
                 var name = resp.name;
                 var price = resp.price;
@@ -99,24 +110,57 @@ var URL = "{{url_for('cart')}}";
             'json');
       
     });
-      
-  function addToCartAjax(miid) {
-    console.log("Sending "+miid+" to the back end");
-    $.get(URL,{'miid':miid},function(resp) { 
-                var name = resp.name;
-                var price = resp.price;
-                $("#[miid=" + resp.miid +"]").find(".name").text(name+" found");
+
+  function customList(obj){
+    
+    if(obj.error) {
+        $("#errors").empty().html('Error: '+obj.err);
+    } else {
+      // for(var i in obj.ingred){
+       console.log(obj.ingred.name);
+       for(var i in obj.ingred.length){
+        $('#ingredList').prepend('<a href="#" type="button" >'+obj.ingred.name+'</a>');
+    }
+        // $("<a>")
+        //     .attr("price",obj.ingred['price'])
+        //     .text(obj.ingred['name'])
+        //     .appendTo("#ingredList");
+      // }
+    }
+
+  }
+
+/* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
+function openNav(miid) {
+  $("#ingredList").empty()
+  document.getElementById("custombar").style.width = "400px";
+  document.getElementById("main").style.marginLeft = "400px";
+  // var miid = $(this).closest("tr").find("input[type=checkbox]").val();
+   
+   $.post(URLm,{'miid':miid},function(resp) { 
+                var ingred = resp.ingred;
+                var extra = resp.extra;
+                console.log(ingred);
+                console.log("yaay!");
+                console.log(extra);
+                for (var i in ingred){
+                  $('#ingredList').prepend('<a href="#" type="button" >'+ingred[i]['name']+'  <input type="checkbox" id="include" kind="'+ingred[i]['kind']+
+                  '" value="'+ingred[i]['price']+'" checked>'+   ingred[i]['price']+'</input> </a>');
+                 }
+                for (var i in extra){
+                  $('#extraList').append('<a href="#" type="button" >'+extra[i]['name']+'  <input type="checkbox" value='+extra[i]['price']+'>'+extra[i]['price']+'</input> </a>');
+                }
             },
             'json');
-  }
-    
-  function validateCart(obj) {
-    console.log(obj);
-        // $("<li>")
-        //     .attr("cart_total",obj)
-        //     .text("item added to cart")
-        //     .appendTo("#navbar");
-  }
+}
+
+
+/* Set the width of the side navigation to 0 and the left margin of the page content to 0 */
+function closeNav() {
+  document.getElementById("custombar").style.width = "0";
+  document.getElementById("main").style.marginLeft = "0";
+  // $("#ingredList").empty()
+}
 
   </script>
   {% endblock %}
