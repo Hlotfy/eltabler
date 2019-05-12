@@ -178,12 +178,13 @@ def payment(username):
             return jsonify({'error':True, 'err':"Please enter an number."})
             
         # make sure the employee enters a payment method
-        if method == '':
+        if not method:
             return jsonify({'error':True, 'err': "Please select a payment method."})
             
         #calculates the user's new balance and updates the database
         newBalance = functions.makePayment(conn,username,method,amount)
-        name = functions.getUser(conn,username)['name']
+        name = user['name']
+        print name
         payments = functions.getRecentPayments(conn,username)
 
         try:
