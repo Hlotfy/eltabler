@@ -1,6 +1,25 @@
 <!DOCTYPE html>
 
+<style>
+.customize {
+  background-color: #f44336;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+.checkboxBigger {
+    width: 20px;
+    height: 20px;
+    background: #ddd;
 
+    border-radius: 100%;
+    position: relative;
+}
+</style>
 {% extends "index.html" %}
 
   {% block content %}
@@ -20,68 +39,45 @@
         <tr>
           <th>Item</th>
         </tr>
-          {% for item in items %}
-            {% if item.kind == "sandwich" %}
-              <!--<div class="filterDiv sandwiches">-->
-               <tr value={{item.miid}}>
-               <td class="name">{{item.name}}</td>
-               <td class="price">{{item.price}}</td>
-               <td>
-                   <!--<form action="{{url_for('cart')}}" method="GET">-->
-                  <!--<input type="hidden" name="miid" value="{{item.miid}}">-->
-                  <input type="checkbox" id="cb" value={{item.miid}}></input>
-               </td>
-               <td><input type="button" id="customMenu" onclick="openNav(this.value)" value={{item.miid}}></button></td>
-                </tr>
+        {% for item in items %}
+          {% if item.kind == "sandwich" %}
+            <tr value={{item.miid}}>
+            <td class="name">{{item.name}}</td>
+            <td class="price">{{item.price}}</td>
+            <td>
+              <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
+            </td>
+            <td><input class ="customize" type="button" id="customMenu" onclick="openNav(this.value)" value="Customize">
+              </button></td>
+            </tr>
 
-
-                <!--<input type=hidden name="name" value="{{item.name}}">-->
-              <!--</div>-->
-            {% elif item.kind == "drink" %}
-               <tr miid={{item.miid}}>
-               <td class="name">{{item.name}}</td>
-               <td class="price">{{item.price}}</td>
-               <td>
-                   <!--<form action="{{url_for('cart')}}" method="GET">-->
-                  <!--<input type="hidden" name="miid" value="{{item.miid}}">-->
-                  <input type="checkbox" id="cb" value={{item.miid}}></input>
-               </td>
-                </tr>
-              <!--<div class="filterDiv drinks">-->
-                <!--<input type="checkbox" onclick="checkItem()" id="item" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>-->
-                <!--<input type=hidden name="name" value="{{item.name}}">-->
-              <!--</div>-->
-            {% elif item.kind == "candy" %}
-              <!----> 
-              <tr miid={{item.miid}}>
-               <td class="name">{{item.name}}</td>
-               <td class="price">{{item.price}}</td>
-               <td>
-                   <!--<form action="{{url_for('cart')}}" method="GET">-->
-                  <!--<input type="hidden" name="miid" value="{{item.miid}}">-->
-                  <input type="checkbox" id="cb" value={{item.miid}}></input>
-               </td>
-                </tr>
-              <!--<div class="filterDiv candies">-->
-                <!--<input type="checkbox" onclick="checkItem()" id="item" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>-->
-                <!--<input type=hidden name="name" value="{{item.name}}">-->
-              <!--</div>-->
-            {% elif item.kind == "snack" %}
-              <tr miid={{item.miid}}>
-               <td class="name">{{item.name}}</td>
-               <td class="price">{{item.price}}</td>
-               <td><form action="{{url_for('cart')}}" method="GET">
-                  <!--<input type="hidden" name="miid" value="{{item.miid}}">-->
-                  <input type="checkbox" id="cb" value="{{item.miid}}"></input>
-               </td>
-                </tr>
-              <!--<div class="filterDiv snacks">-->
-                <!--<input type="checkbox" onclick="checkItem()" id="item" name="miid" value="{{item.miid}}">{{item.name}}....{{item.price}}</input>-->
-                <!--<input type=hidden name="name" value="{{item.name}}">-->
-              <!--</div>-->
-            {% endif %}
-          {% endfor %}
-          </table>
+          {% elif item.kind == "drink" %}
+            <tr miid={{item.miid}}>
+            <td class="name">{{item.name}}</td>
+            <td class="price">{{item.price}}</td>
+            <td>
+              <input class ="checkboxBigger" type="checkbox" id="cb" value={{item.miid}}></input>
+            </td>  
+            </tr>
+          {% elif item.kind == "candy" %}
+            <tr miid={{item.miid}}>
+            <td class="name">{{item.name}}</td>
+            <td class="price">{{item.price}}</td>
+            <td>
+              <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
+            </td>
+            </tr>
+          {% elif item.kind == "snack" %}
+            <tr miid={{item.miid}}>
+            <td class="name">{{item.name}}</td>
+            <td class="price">{{item.price}}</td>
+            <td><form action="{{url_for('cart')}}" method="GET">
+              <input class ="checkboxBigger"  type="checkbox" id="cb" value="{{item.miid}}"></input>
+            </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+        </table>
      
       <br><button type="submit">Checkout!</button>
       </form>
