@@ -210,7 +210,7 @@ def payment(username):
             # convert to float to type check and to insert into database
             amount = float(amount)
         except ValueError:
-            return jsonify({'error':True, 'err':"Please enter an number."})
+            return jsonify({'error':True, 'err':"Please enter a number."})
             
         # make sure the employee enters a payment method
         if not method:
