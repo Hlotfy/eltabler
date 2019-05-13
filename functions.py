@@ -123,7 +123,7 @@ def addOrderItems(conn,item,oid):
 # fetches a user's recent orders based on their username
 def getRecentOrders(conn, user):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select orders.oid, orders.dt, count(orderItem.miid) as item_num, sum(menuItem.price * orderItem.quantity) as "total" from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s group by orders.oid order by orders.oid DESC',(user,))
+    curs.execute('select orders.oid, orders.dt, sum(orderItem.quantity) as item_num, sum(menuItem.price * orderItem.quantity) as "total" from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s group by orders.oid order by orders.oid DESC',(user,))
     return curs.fetchall()
     
 # fetches order items associated with a user based on their username

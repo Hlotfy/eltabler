@@ -112,18 +112,8 @@ create table payments (
     amount double,
     foreign key (username) references user (username)
 );
-
--- create table session (
---     sid int auto_increment primary key,
---     st timestamp default current_timestamp,
---     username varchar(30),
---     foreign key (username) references user (username)
--- );
-
--- insert into user(name, username, balanceOwed)
--- values ("Mona Kashyap", "mkashyap", 0.00);
        
-insert into staff(username) values ("hlotfy"),("elennonj"),("mkashyap"),("acamacho");
+insert into staff(username) values ("hlotfy"),("elennonj"),("mkashyap"),("acamacho"),("sanderso");
        
 -- insert into orders(dt,username) values(now(),'hlotfy');
 -- insert into orderItem(oid,miid,quantity) values((select oid from orders where username="hlotfy" limit 1),(select miid from menuItem where name="Yoohoo"),1);

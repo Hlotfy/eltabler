@@ -97,7 +97,7 @@ def order():
         
         return jsonify({'ingred':ingred, 'extra':extra})
     items = functions.getAllMenuItems(conn)
-    return render_template('order_form.html', items=items)
+    return render_template('order_form2.html', items=items)
 
 @app.route('/access_tab', methods = ['POST'])
 # route which processes access to the selected user's tab, adding the username to the session and creating a sesion id for the session
@@ -180,13 +180,11 @@ def cart():
     
     return render_template('shopping_cart_page.html')
     
-@app.route('/clearCart', methods=['POST'])
+@app.route('/clearCart/', methods=['POST'])
 def clearCart():
     conn = functions.getConn('tabtracker')
-    # menu = functions.getAllMenuItems(conn)
-    session['cart'] = {}
-    err = len(session['cart'])==0
-    return jsonify({'Error':err})
+    session['cart']={}
+    return redirect(url_for('cart'))
 
 @app.route('/<username>/payment/', methods=['GET','POST'])
 # accesses payment history for selected user and allows payments to be made to user's tab balance
