@@ -2,7 +2,7 @@
 
 <style>
 .customize {
-  background-color: #f44336;
+  background-color: pink;
   border: none;
   color: white;
   padding: 10px 20px;
@@ -18,6 +18,10 @@
 
     border-radius: 100%;
     position: relative;
+}
+
+.bold { 
+    font-weight: bold; 
 }
 </style>
 {% extends "index.html" %}
@@ -42,12 +46,13 @@
         {% for item in items %}
           {% if item.kind == "sandwich" %}
             <tr value={{item.miid}}>
-            <td class="name">{{item.name}}</td>
-            <td class="price">{{item.price}}</td>
+            <td id="b" class="name">{{item.name}}</td>
+            <td id="b2" class="price">{{item.price}}</td>
             <td>
               <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
             </td>
-            <td><input class ="customize" type="button" id="customMenu" onclick="openNav(this.value)" value="Customize">
+            <td>
+              <button class ="customize" type="button" id="customMenu" onclick="openNav(this.value)" value={{item.miid}}> Customize
               </button></td>
             </tr>
 
@@ -78,7 +83,8 @@
           {% endif %}
         {% endfor %}
         </table>
-     
+       <br>
+      Total Price: <input type="text" name="subtotal" value="0" />
       <br><button type="submit">Checkout!</button>
       </form>
     </div>
@@ -101,7 +107,7 @@ var URLm = "{{url_for('order')}}"
       $.post(URL,{'miid':miid, 'name':name, 'price':price},function(resp) { 
                 var name = resp.name;
                 var price = resp.price;
-                $("#[miid=" + resp.miid +"]").find(".name").css('font-weight','bold').text(name+" found");
+                $("#[miid=" + resp.miid +"]").find(".name").text(name);
             },
             'json');
       
@@ -122,37 +128,72 @@ function openNav(miid) {
                 // console.log(miid);
                  $('#ingredList').val(miid)
                 for (var i in ingred){
-                  $('#ingredList').prepend('<a href="#" type="button" >'+ingred[i]['name']+'  <input type="checkbox" id="include" kind="'+ingred[i]['kind']+
-                  '" value="'+ingred[i]['price']+'" checked>'+   ingred[i]['price']+'</input> </a>');
+                  $('#ingredList').prepend('<a href="#" type="button" >'+ingred[i]['name']+'  <input type="checkbox" class = "calc" id="include" kind="'+ingred[i]['kind']+
+                  '" value="'+ingred[i]['price']+'"iid="'+ingred[i]['iid']+'"checked>'+   ingred[i]['price']+'</input> </a>');
+                  console.log($(this).find('#ingredList').find('input[iid='+ingred[i]['iid']+']').iid);
                  }
                 for (var i in extra){
-                  $('#extraList').append('<a href="#" type="button" >'+extra[i]['name']+'  <input type="checkbox" value='+extra[i]['price']+'>'+extra[i]['price']+'</input> </a>');
+                  $('#extraList').append('<a href="#" type="button" >'+extra[i]['name']+'  <input class ="calc" type="checkbox" value='+extra[i]['price']+'>'+extra[i]['price']+'</input> </a>');
                 }
+                $('#extraList').append('Item Price: <input type="text" name="sum" value="0" />');
             },
             'json');
+    
 }
+
+// toggle for bolding later
+// function bold() { 
+//   document.getElementById('b').classList.toggle('bold'); 
+//   document.getElementById('b2').classList.toggle('bold'); 
+//   console.log("you are bold");
+// }
+
+function calcTotal(){
+  var total = 0;
+  $(".calc:checked").each(function(){
+        total+=parseFloat($(this).val(),10);
+    });
+    $("input[name=sum]").val(total)
+}
+  
+    $("#extraList").on("click", "input[type=checkbox]", function(event){
+      calcTotal();
+    });
+    
+function calcPrice(){
+  var total =0;
+  $(".checkboxBigger:checked").each(function(){
+        total+=parseFloat($(this).closest("tr").find(".price").text(),10);
+    });
+    $("input[name=subtotal]").val(total)
+}
+    $("#menuItems").on("click", "input[type=checkbox]", function(event){
+      calcPrice();
+    });
 
  $("#ingredList").on(
     "click", "input[type=checkbox]",
-    function(event) {
+    function() {
+      console.log($(this).checked);
       var name = $(this).name;
-      var price = $(this).val();
+      var iprice = parseFloat($(this).val());
       var miid = $(this).closest("#ingredList").val();
-      console.log(miid);
-      console.log(price);
-      var oprice = $("#[miid=" + miid +"]").find(".price").css().text();
+      // console.log(miid);
+      console.log(iprice);
+      var oprice = parseFloat($("tr[value=" + miid +"]").find(".price").text());
+      
       console.log(oprice);
-      var nprice = oprice-price;
-      // $("#menuItems").("#[miid=" + miid +"]").find(".price").text();
-      
-    //   $.post(URL,{'miid':miid, 'name':name, 'price':price},function(resp) { 
-    //             var name = resp.name;
-    //             var price = resp.price;
-    //             $("#[miid=" + resp.miid +"]").find(".name").css('font-weight','bold').text(name+" found");
-    //         },
-    //         'json');
-      
+      console.log($(this)[0].checked);
+      var nprice = oprice;
+      if ($(this)[0].checked === true) {
+        nprice+=iprice;
+      }else{
+        nprice-=iprice;
+      }
+      $("tr[value=" + miid +"]").find(".price").text(nprice);
+      $("input[name=sum]").val(nprice)
    });
+
 
 
 /* Set the width of the side navigation to 0 and the left margin of the page content to 0 */
@@ -161,6 +202,5 @@ function closeNav() {
   document.getElementById("main").style.marginLeft = "0";
   // $("#ingredList").empty()
 }
-
   </script>
   {% endblock %}

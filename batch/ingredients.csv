@@ -1,11 +1,11 @@
 iid,name,kind,price,instock
-0,sourdough,bread,1,1
-0,wheat,bread,1,1
-0,multigrain,bread,1,1
-0,rye,bread,1,1
-0,rosemary garlic,bread,1,1
-0,bagel,bread,1.5,1
-0,croissant,bread,1.5,1
+0,sourdough,bread,2,1
+0,wheat,bread,2,1
+0,multigrain,bread,2,1
+0,rye,bread,2,1
+0,rosemary garlic,bread,2,1
+0,bagel,bread,2.5,1
+0,croissant,bread,2.5,1
 0,provolone,cheese,1.5,1
 0,cheddar,cheese,1.5,1
 0,muenster,cheese,1.5,1
