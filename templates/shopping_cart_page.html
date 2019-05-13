@@ -18,28 +18,13 @@
       <th></th>
       <th></th>
     {% for item in session['cart'] %}
-    
-  
-
-          <!--<td></td>-->
-           <!--<div class="buttons">-->
-           <!--   <span class="delete-btn"></span>-->
-           <!--   <span class="like-btn"></span>-->
-           <!-- </div>-->
-            
-          
-          <!--<td></td>-->
-          
-          <!--<td></td>-->
-          <!--<td></td>-->
-        
         
         <tr class="quantity" value={{item}}>
           <td><input type="hidden" id="miid" name="miid" value="{{item}}"></td>
           <td><button class="remove-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='delete-icn.svg') }}" alt="" />
               </button></td>
-          <td class="description">{{session['cart'][item]['name']}}</td>
+          <p><td class="description">{{session['cart'][item]['name']}}</td></p>
           <td>
               <button class="minus-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='minus.svg') }}" alt="" />
@@ -50,31 +35,57 @@
               </button>
             
         </td>
-        <td class ="price">$ {{session['cart'][item]['price']}}</td>
+        <p><td> <input type="hidden" class ="price" value="{{session['cart'][item]['price']}}">$ {{session['cart'][item]['price']}}</td></p>
+        <p><td class="total">$ ({{session['cart'][item]['price']}} * {{session['cart'][item]['quantity']}})</td></p>
         </tr>
         </div>   
-
-              
-
              
     {% endfor %}
-      
+       <tr class="total">
+         <td></td>
+         
+         <td></td>
+         <td>Order Total: </td>
+         <td></td>
+         <td></td>
+         <td></td>
+         <td></td>
+         <td class="orderTotal" value=""></td>
+       </tr>
+       
     </table>
     <br><button type="submit">Place Order!</button> <!--should 'place order' and add order info to recent orders page-->
    
-
+ 
   </form>
    
    <form id="clearCart-btn" action="{{url_for('clearCart')}}" method="POST">
       <button type="submit" value="Clear Cart!!">Clear Cart!!</button>
-    </form>
+   </form>
      
       </div>
       
       <script>
+    
       /* global $ */
      
      var URL = "{{url_for('cart')}}";
+     
+     calcItemTotal();
+     
+     function calcItemTotal(){
+       var ototal = 0;
+     $("#cartItems tr.quantity").each(function(){
+       var quant = parseFloat($(this).find("#quantity").val());
+       console.log(quant);
+       var iprice = parseFloat($(this).find(".price").val());
+       console.log(iprice);
+       var itotal = quant*iprice;
+       ototal += itotal;
+       $(this).find(".total").text("$" +itotal);
+     });
+      $("#cartItems tr.total").find(".orderTotal").text("$" +ototal);
+     }
      
     /*button to decrease the quantity of an item in the shopping cart by 1 unit.
       If quantity reaches 1, remains at 1 (1 is lower bound). */ 
@@ -132,43 +143,8 @@
           function(resp){ console.log("new quantity for "+resp.miid+" is "+resp.quantity);
             
           });
+          calcItemTotal();
       }
-      
-    /*function to get number of items in cart*/
-    // function cartSize(miid, quantity){
-      
-    // }
-    
-    /*function to clear cart of all items, essentially updating quantity of all 
-      items in cart to be 0*/
-    // $(".clearCart-btn").on("click", function(event){
-    //   //want to remove ALL items currently in cart, not just single items
-    //   var miid = $(this).closest(".quantity").find("#miid").val();
-    //   console.log(miid);
-      
-    //   var quant = $(this).closest(".quantity").find("input[name='quantity']").val();
-    //   // console.log(quant);
-    //   // var numItems = cartSize(miid, quantity);
-      
-    //   // if (numItems > 1 ){
-    //   //   for i in numItems{
-          
-    //   //   }
-    //   // }
-    //   // for item in session['cart']{
-    //   //   $(this).closest(".quantity").find("input[name='quantity']").val(quant);
-    //   //   $(this).closest(".quantity").remove();
-    //   //   changeQuant(miid,0);
-    //   // }
-      
-    //   // for all items in cart:
-    //   //   remove();
-      
-      
-    //   // $(this).parent().parent().remove(); 
-    //   // // .closest(".quantity").remove();
-    //   // changeQuant(miid,0);
-    // });
 
       </script>
       

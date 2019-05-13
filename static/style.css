@@ -3,6 +3,10 @@ body {
   font-family: monospace;
 }
 
+p {
+   font-family: monospace;
+}
+
 #mbar {
   list-style-type: none;
   margin: 0;
@@ -316,4 +320,17 @@ td {
 @media screen and (max-height: 450px) {
   .sidenav {padding-top: 15px;}
   .sidenav a {font-size: 18px;}
+}
+
+.boxed {
+  background-color: lightgrey;
+  width: 300px;
+  border: 8px solid cyan;
+  padding: 50px;
+  margin: 20px;
+}
+
+.orderBox {
+  outline-color:pink;
+  outline-style: dashed;
 }

@@ -41,7 +41,9 @@
       <form action="{{url_for('cart')}}" method="GET"> 
       <table id="menuItems">
         <tr>
-          <th>Item</th>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Add to Cart</th>
         </tr>
         {% for item in items %}
           {% if item.kind == "sandwich" %}
@@ -193,6 +195,28 @@ function calcPrice(){
       $("tr[value=" + miid +"]").find(".price").text(nprice);
       $("input[name=sum]").val(nprice)
    });
+   
+  // $("#extraList").on(
+  //   "click", "input[type=checkbox]",
+  //   function() {
+  //     var name = $(this).name;
+  //     var iprice = parseFloat($(this).val());
+  //     var miid = $(this).closest("#ingredList").val();
+  //     // console.log(miid);
+  //     console.log(iprice);
+  //     var oprice = parseFloat($("tr[value=" + miid +"]").find(".price").text());
+      
+  //     console.log(oprice);
+  //     console.log($(this)[0].checked);
+  //     var nprice = oprice;
+  //     if ($(this)[0].checked === true) {
+  //       nprice+=iprice;
+  //     }else{
+  //       nprice-=iprice;
+  //     }
+  //     $("tr[value=" + miid +"]").find(".price").text(nprice);
+  //     $("input[name=sum]").val(nprice)
+  // });
 
 
 
@@ -200,7 +224,6 @@ function calcPrice(){
 function closeNav() {
   document.getElementById("custombar").style.width = "0";
   document.getElementById("main").style.marginLeft = "0";
-  // $("#ingredList").empty()
 }
   </script>
   {% endblock %}

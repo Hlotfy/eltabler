@@ -60,11 +60,16 @@ def staff_login():
     passwd = request.form['pwd']
     row = functions.login(conn,staffId)
     hashed = row['hashed']
-    if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
+    if hashed and bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
         flash('successfully logged in as '+staffId)
         session['staffId'] = staffId
+        session['currentOrders'] = {}
         return redirect(url_for('tabs'))
     else:
+        if not hashed:
+            session['staffId'] = staffId
+            session['currentOrders'] = {}
+            return redirect(url_for('tabs'))
         flash("incorrect login credentials!")
         return redirect(url_for('index'))
     
@@ -97,7 +102,7 @@ def order():
         
         return jsonify({'ingred':ingred, 'extra':extra})
     items = functions.getAllMenuItems(conn)
-    return render_template('order_form2.html', items=items)
+    return render_template('order_form.html', items=items)
 
 @app.route('/access_tab', methods = ['POST'])
 # route which processes access to the selected user's tab, adding the username to the session and creating a sesion id for the session
@@ -139,6 +144,11 @@ def recent_orders(username):
             orders = functions.getRecentOrders(conn,username)
             items = functions.getOrderItems(conn,username)
             user = functions.getUser(conn,username)
+            if session['username'] in session['currentOrders']:
+                session['currentOrders'][session['username']].update(session['cart'])
+            else:
+                session['currentOrders'][session['username']] = session['cart']
+            print session['currentOrders'][session['username']]
             clearCart()
             return render_template('recent_orders.html',orders=orders, items=items, user=user)
         else:
@@ -148,6 +158,14 @@ def recent_orders(username):
     items = functions.getOrderItems(conn,username)
     user = functions.getUser(conn,username)
     return render_template('recent_orders.html',orders=orders, items=items, user=user)
+
+@app.route('/current_orders/',  methods = ['POST', 'GET'])
+# creates order, adds selected menu items to cart
+# add safeguard so you don't create an order with no order items
+# delete orders with no order items
+def current_orders():
+    print session['currentOrders']
+    return render_template('current_orders_page.html')
 
 @app.route('/cart/', methods=['GET','POST'])
 # keeps track of all selected menu items for current session and renders cart template
@@ -173,6 +191,9 @@ def cart():
         if miid in cart:
             cart[miid]['quantity'] += 1
         else:
+            #extras = {}
+            item['extras'] = {}
+            print item
             cart[miid] = item
         print cart
         session['cart'] = cart
@@ -201,24 +222,17 @@ def payment(username):
         amount = request.form.get('amount')
         method = request.form.get('method')
         dt = request.form.get('dt')
-        values = request.values
         print "request dt: ", dt
-        print "values: ", values
         
         try:
             # convert to float to type check and to insert into database
             amount = float(amount)
         except ValueError:
-            return jsonify({'error':True, 'err':"Please enter a number."})
+            return jsonify({'error':True, 'err':"Please enter an number."})
             
         # make sure the employee enters a payment method
         if not method:
             return jsonify({'error':True, 'err': "Please select a payment method."})
-            
-        # make sure new payment will not drop balance below 0
-        currentBalance = functions.getUser(conn,username)['balanceOwed']
-        if(currentBalance - amount < 0):
-            return jsonify({'error':True, 'err': "Please enter an amount that is less than the current balance."})
             
         #calculates the user's new balance and updates the database
         newBalance = functions.makePayment(conn,username,method,amount,dt)
@@ -237,5 +251,5 @@ def payment(username):
                            
 if __name__ == '__main__':
     app.debug = True
-    app.run('0.0.0.0',8082)
+    app.run('0.0.0.0',8081)
 
