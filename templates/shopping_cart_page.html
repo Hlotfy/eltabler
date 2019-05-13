@@ -36,7 +36,9 @@
         
         <tr class="quantity" value={{item}}>
           <td><input type="hidden" id="miid" name="miid" value="{{item}}"></td>
-          <td><span class="remove-btn" type="button">&times;</span></td>
+          <td><button class="remove-btn" type="button" name="button">
+                <img src="{{ url_for('static', filename='delete-icn.svg') }}" alt="" />
+              </button></td>
           <td class="description">{{session['cart'][item]['name']}}</td>
           <td>
               <button class="minus-btn" type="button" name="button">
@@ -60,7 +62,23 @@
     </table>
     <br><button type="submit">Place Order!</button> <!--should 'place order' and add order info to recent orders page-->
     
+    <!--<button class="clearCart-btn" type="button" name="button"> Clear Cart!</button>-->
+    <!--<form method=post action="{{url_for('clearCart')}}">-->
+    <!--    <input type=submit name=submit value="Clear Cart">-->
+    <!--</form>-->
     
+    <form id="clearCart-btn" action="{{url_for('clearCart')}}" method="POST">
+        <a href="#" onclick="document.getElementById('clearCart-btn')">Clear Cart!</a>
+    </form>
+    
+    <!--<form id="logout_btn" action="{{url_for('leave_tab')}}" method="POST">-->
+    <!--    <a href="#" onclick="document.getElementById('logout_btn').submit()">Logout</a>-->
+    <!--</form>-->
+    
+    <!--<form id="clearCart-btn" action="{{url_for('clearCart')}}" method="POST">-->
+    <!--  <button type="POST" value="Clear Cart!!">Clear Cart!!</button>-->
+    <!--</form>-->
+
     </form>
 
      
@@ -71,38 +89,55 @@
      
      var URL = "{{url_for('cart')}}";
      
+    /*button to decrease the quantity of an item in the shopping cart by 1 unit.
+      If quantity reaches 1, remains at 1 (1 is lower bound). */ 
      $(".minus-btn").on("click", function(event){
       // $(this).closest(".quantity").remove();
         var miid = $(this).closest(".quantity").find("#miid").val();
         console.log(miid);
         
         var quant = $(this).closest(".quantity").find("input[name='quantity']").val();
-        quant = parseInt(quant,10) - 1;
+        if (quant && quant > 1){
+          quant = parseInt(quant,10) - 1;
+        }else{
+          quant = 1;
+        }
        
         $(this).closest(".quantity").find("input[name='quantity']").val(quant);
-        if(quant===0){
-          $(this).closest(".quantity").remove();
-        }
+        // if(quant===0){
+        //   $(this).closest(".quantity").remove();
+        // }
         changeQuant(miid,quant);
      });
      
+     /*button to increase the quantity of an item in the shopping cart by 1 unit.
+     If quantity reaches 100, remains at 100 (100 is upper bound). */ 
+     /*want to change so upper bound is the current quantity remaining of that item!!*/
      $(".plus-btn").on("click", function(event){
         var miid = $(this).closest(".quantity").find("#miid").val();
         var quant = $(this).closest(".quantity").find("input[name='quantity']").val();
-        quant = parseInt(quant,10) + 1;
+        
+        if(quant && quant < 100){
+          quant = parseInt(quant,10) + 1;
+        }else{
+          quant = 100;
+        }
+        
         $(this).closest(".quantity").find("input[name='quantity']").val(quant);
         changeQuant(miid,quant);
      });
-     
+    
+    /*button to remove an item from the shopping cart */ 
     $(".remove-btn").on("click", function(event){
-        var miid = $(this).closest(".quantity").find("#miid").val();
-       $(this).parent().parent().remove(); 
+      var miid = $(this).closest(".quantity").find("#miid").val();
+      $(this).parent().parent().remove(); 
       // .closest(".quantity").remove();
-       changeQuant(miid,0);
+      changeQuant(miid,0);
     });
     
     $("#quantity").oninput = function() { changeQuant($(this).closest(".quantity").find("#miid").val(),$(this).val()); };
 
+    /*function to update quantity of item using miid (ID value associated with item)*/
     function changeQuant(miid,quantity) {
         console.log("changing quantity of "+miid+" to " +quantity);
         $.post(URL,
@@ -110,7 +145,43 @@
           function(resp){ console.log("new quantity for "+resp.miid+" is "+resp.quantity);
             
           });
-      }        
+      }
+      
+    /*function to get number of items in cart*/
+    // function cartSize(miid, quantity){
+      
+    // }
+    
+    /*function to clear cart of all items, essentially updating quantity of all 
+      items in cart to be 0*/
+    // $(".clearCart-btn").on("click", function(event){
+    //   //want to remove ALL items currently in cart, not just single items
+    //   var miid = $(this).closest(".quantity").find("#miid").val();
+    //   console.log(miid);
+      
+    //   var quant = $(this).closest(".quantity").find("input[name='quantity']").val();
+    //   // console.log(quant);
+    //   // var numItems = cartSize(miid, quantity);
+      
+    //   // if (numItems > 1 ){
+    //   //   for i in numItems{
+          
+    //   //   }
+    //   // }
+    //   // for item in session['cart']{
+    //   //   $(this).closest(".quantity").find("input[name='quantity']").val(quant);
+    //   //   $(this).closest(".quantity").remove();
+    //   //   changeQuant(miid,0);
+    //   // }
+      
+    //   // for all items in cart:
+    //   //   remove();
+      
+      
+    //   // $(this).parent().parent().remove(); 
+    //   // // .closest(".quantity").remove();
+    //   // changeQuant(miid,0);
+    // });
 
       </script>
       
