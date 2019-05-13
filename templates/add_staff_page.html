@@ -5,16 +5,16 @@
 <input id="changeform" type="button" value="Click Here to Change Staff Member Password">
 
 <div >
-<form id="joinform" style="display:block" method="GET">
+<div id="joinform" style="display:block" >
     <h2>Join</h2>
     <p><label><input type="text" name="username" required pattern="^\w+$"> Username</label></p>
     <p><label><input type="password" name="password1" required> Password </label></p>
     <p><label><input type="password" name="password2" required> Password again </label></p>
     <p><button type="submit">Submit</button></p>
-</form>
+</div>
 </div>
 <div >
-<form id="changepwdform" style="display:none" method="GET">
+<form id="changepwdform" style="display:none" method="POST">
     <h2>Change Staff Member Password</h2>
     <p><label><input type="text" name="username" required pattern="^\w+$"> Staff Username</label></p>
     <p><label><input type="password" name="password1" required> New Password </label></p>
@@ -47,29 +47,59 @@ $("#changeform").on("click", function(event){
     
 });
 // $("#changeform").addEventListener("click",toggle_func);
-// var URL = "{{url_for('add_staff')}}";
+var URL = "{{url_for('add_staff')}}";
 
 $("#joinform").on('submit', function (event) {
+    event.preventDefault();
      var usr = $(this).find('[name=username]').val();
      var pw1 = $(this).find('[name=password1]').val();
      var pw2 = $(this).find('[name=password2]').val();
-     // should also check for length and common words etc
      if( pw1 != pw2 ) {
          // something more sophisticated than alert would be nice
-        //  event.preventDefault();
+         $(this).reset();
          alert("passwords don't match");
      } else if(pw1.length < 8) {
-        //  event.preventDefault();
          alert("passwords must be a minimum of 8 characters long");
      } else {
-               $.post(URL,{'username':usr, 'password': pw1},function(resp) { 
-                var error = resp.error;
-                var username = resp.staffId;
-                if(error === true){
-                    alert("Error: "+error);
-                } else {
-                    alert("The following user was successfully added as a staff member: "+username);
+          
+        $.post(URL,{'username':usr, 'password': pw1},function(resp) { 
+        var error = resp.error;
+        var username = resp.staffId;
+        if(error === true){
+                alert("Error: "+error);
+                // } else {
+                    // alert("The following user was successfully added as a staff member: "+username);
                 }
+                // var price = resp.price;
+                // $("#[miid=" + resp.miid +"]").find(".name").css('font-weight','bold').text(name+" found");
+            },
+            'json');
+     }
+});
+
+$("#changepwdform").on('submit', function (event) {
+    event.preventDefault();
+     var usr = $(this).find('[name=username]').val();
+     var pw1 = $(this).find('[name=password1]').val();
+     var pw2 = $(this).find('[name=password2]').val();
+     if( pw1 != pw2 ) {
+         // something more sophisticated than alert would be nice
+         
+         alert("passwords don't match");
+     } else if(pw1.length < 8) {
+         alert("passwords must be a minimum of 8 characters long");
+     } else {
+        $(this).find('[name=username]').val("");
+        $(this).find('[name=password1]').val("");
+        $(this).find('[name=password2]').val("");
+        $.post(URL,{'username':usr, 'password': pw1},function(resp) { 
+        var error = resp.error;
+        var username = resp.staffId;
+        if(error === true){
+            alert("Error: "+error);
+        } else {
+            alert("The following user was successfully added as a staff member: "+username);
+        }
                 // var price = resp.price;
                 // $("#[miid=" + resp.miid +"]").find(".name").css('font-weight','bold').text(name+" found");
             },

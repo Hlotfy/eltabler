@@ -37,12 +37,13 @@ def add_staff():
         try:
             staffId = request.form.get('username')
             password = request.form.get('password')
-            if staffId == functions.getUser(conn, staffId)['username']:
-                return jsonify({'error':True, 'err':"Staff member already exists. Please select Change Password to modify existing staff."})
             hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
             is_added = functions.addStaffMember(conn,staffId,hashed)
-            if is_added:
-                #flash('welcome aboard! successfully added new staff member ' + staffId)
+            if staffId == functions.getStaff(conn, staffId)['username']:
+                
+                return jsonify({'error':False, 'user':staffId})
+            else:
+                
                 return jsonify({'error':False, 'user':staffId})
         except Exception as err:
             flash('form submission error '+str(err))
@@ -58,10 +59,9 @@ def staff_login():
     staffId = request.form['staffId']
     passwd = request.form['pwd']
     row = functions.login(conn,staffId)
-    if row:
-        # hashed = row['hashed']
-        # if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
-        #     flash('successfully logged in as '+staffId)
+    hashed = row['hashed']
+    if bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
+        flash('successfully logged in as '+staffId)
         session['staffId'] = staffId
         return redirect(url_for('tabs'))
     else:
@@ -185,7 +185,8 @@ def clearCart():
     conn = functions.getConn('tabtracker')
     # menu = functions.getAllMenuItems(conn)
     session['cart'] = {}
-    return redirect(request.referrer)
+    err = len(session['cart'])==0
+    return jsonify({'Error':err})
 
 @app.route('/<username>/payment/', methods=['GET','POST'])
 # accesses payment history for selected user and allows payments to be made to user's tab balance

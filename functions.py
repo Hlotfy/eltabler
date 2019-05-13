@@ -18,7 +18,12 @@ def getConn(db):
 # returns the user's username if they are a staff member, else returns None
 def login(conn,username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select hashed from staff where username=%s',(username,))
+    curs.execute('select * from staff where username=%s',(username,))
+    return curs.fetchone()
+
+def getStaff(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select username from staff where username=%s',(username,))
     return curs.fetchone()
 
 def addStaffMember(conn,username,hashed):
@@ -26,14 +31,13 @@ def addStaffMember(conn,username,hashed):
     curs.execute('SELECT username FROM staff WHERE username = %s',
                      [username])
     row = curs.fetchone()
-    if row is not None:
-        return False
+    
     curs.execute('INSERT into staff(username,hashed) \
                             VALUES(%s,%s) \
                             on duplicate key update \
                             hashed = %s',
                  (username, hashed, hashed))
-    curs.commit()
+    conn.commit()
     curs.execute('SELECT username FROM staff WHERE username = %s',
                      [username])
     return curs.fetchone()
@@ -133,14 +137,6 @@ def getRecentPayments(conn,username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from payments where username = %s order by dt DESC;',(username,))
     return curs.fetchall()
-
-# creates new session for selected user tab
-def newSession(conn,username):
-    curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('insert into session (username) values (%s)',(username,))
-    conn.commit()
-    curs.execute('select max(sid) as "sid" from session')
-    return curs.fetchone()
 
 # for use in short testing
 if __name__ == '__main__':
