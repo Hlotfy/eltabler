@@ -19,18 +19,23 @@
             <option value="venmo">Venmo</option>
         </select>
         
-        </p>
-    <p><input type="submit" id="submit-btn" value="Submit"></p>
+    </p>
+    <!--<p><button name="submit-btn" type="button">Submit</button></p>-->
+    <p><input type="button" id="submit-btn" value="Submit"></p>
+    </form>
     
+    <h2>{{session['username']}}'s Payment history</h2>
+    <div id=payments>
     {% if payments %}
 
-    <h2>{{session['username']}}'s Payment history</h2>
-
-    <div id=payments>
+    
     {% for p in payments %}
         <p><span class="payments">{{p.dt}}</span>...............<span class="payments">{{p.method}}</span>...............<span class="payments">{{p.amount}}</span>
         </p>
     {% endfor %}
+    
+    {% endif %}
+    </div>
     <script>
     /* global $ */
         
@@ -74,8 +79,5 @@
     </script>
     
         
-    </div>
-    {% endif %}
-</form>
     
 {% endblock %}
