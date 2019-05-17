@@ -48,16 +48,13 @@
         {% for item in items %}
           {% if item.kind == "sandwich" %}
             <tr value={{item.miid}}>
-             
             <td id="b" class="name">{{item.name}}</td>
             <td id="b2" class="price">{{item.price}}</td>
             <td>
-              <label>Add
               <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
-              </label>
             </td>
             <td>
-              <button class ="customize" type="button" id="customMenu" onclick="openNav(this.value)" value={{item.miid}}>Customize
+              <button class ="customize" type="button" id="customMenu" onclick="openNav(this.value)" value={{item.miid}}> Customize
               </button></td>
             </tr>
 
@@ -66,9 +63,7 @@
             <td class="name">{{item.name}}</td>
             <td class="price">{{item.price}}</td>
             <td>
-              <label>Add
               <input class ="checkboxBigger" type="checkbox" id="cb" value={{item.miid}}></input>
-              </label>
             </td>  
             </tr>
           {% elif item.kind == "candy" %}
@@ -76,29 +71,22 @@
             <td class="name">{{item.name}}</td>
             <td class="price">{{item.price}}</td>
             <td>
-              <label>Add
               <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
-              </label>
             </td>
             </tr>
           {% elif item.kind == "snack" %}
             <tr miid={{item.miid}}>
             <td class="name">{{item.name}}</td>
             <td class="price">{{item.price}}</td>
-            <td>
-              <label>Add
+            <td><form action="{{url_for('cart')}}" method="GET">
               <input class ="checkboxBigger"  type="checkbox" id="cb" value="{{item.miid}}"></input>
-              </label>
             </td>
             </tr>
           {% endif %}
         {% endfor %}
         </table>
        <br>
-       <label>
       Total Price: <input type="text" name="subtotal" value="0" />
-      </label>
-      
       <br><button type="submit">Checkout!</button>
       </form>
     </div>
@@ -149,7 +137,10 @@ function openNav(miid) {
                 for (var i in extra){
                   $('#extraList').append('<a href="#" type="button" >'+extra[i]['name']+'  <input class ="calc" type="checkbox" value='+extra[i]['price']+'>'+extra[i]['price']+'</input> </a>');
                 }
-                $('#extraList').append('Item Price: <input type="text" name="sum" value="0" />');
+                // $("tr[value=" + miid +"]").find(".price").text(nprice);
+                // $("input[name=sum]").val(nprice)
+                $("tr[value=" + miid +"]").append('Item Price: <input type="text" name="sum" value="0" />');
+                // $('#extraList').append('Item Price: <input type="text" name="sum" value="0" />');
             },
             'json');
     
@@ -174,6 +165,8 @@ function calcTotal(){
       calcTotal();
     });
     
+// var miid = $(this);
+// console.log(miid)
 function calcPrice(){
   var total =0;
   $(".checkboxBigger:checked").each(function(){
@@ -184,29 +177,28 @@ function calcPrice(){
     $("#menuItems").on("click", "input[type=checkbox]", function(event){
       calcPrice();
     });
-
- $("#ingredList").on(
-    "click", "input[type=checkbox]",
-    function() {
-      console.log($(this).checked);
-      var name = $(this).name;
-      var iprice = parseFloat($(this).val());
-      var miid = $(this).closest("#ingredList").val();
-      // console.log(miid);
-      console.log(iprice);
-      var oprice = parseFloat($("tr[value=" + miid +"]").find(".price").text());
+    
+// $("#ingredList").on(
+//     "click", "input[type=checkbox]",
+//     function() {
+//       var name = $(this).name;
+//       var iprice = parseFloat($(this).val());
+//       var miid = $(this).closest("#ingredList").val();
+//       console.log(miid);
+//       console.log(iprice);
+//       var oprice = parseFloat($("tr[value=" + miid +"]").find(".price").text());
       
-      console.log(oprice);
-      console.log($(this)[0].checked);
-      var nprice = oprice;
-      if ($(this)[0].checked === true) {
-        nprice+=iprice;
-      }else{
-        nprice-=iprice;
-      }
-      $("tr[value=" + miid +"]").find(".price").text(nprice);
-      $("input[name=sum]").val(nprice)
-   });
+//       console.log($(this)[0].checked);
+//       var nprice = oprice;
+//       if ($(this)[0].checked === true) {
+//         nprice+=iprice;
+//       }else{
+//         nprice-=iprice;
+//       }
+//       console.log(nprice);
+//       $("tr[value=" + miid +"]").find(".price").text(nprice);
+//       $("input[name=sum]").val(nprice)
+//   });
    
   // $("#extraList").on(
   //   "click", "input[type=checkbox]",
@@ -214,11 +206,11 @@ function calcPrice(){
   //     var name = $(this).name;
   //     var iprice = parseFloat($(this).val());
   //     var miid = $(this).closest("#ingredList").val();
-  //     // console.log(miid);
+  //     console.log(miid)
   //     console.log(iprice);
-  //     var oprice = parseFloat($("tr[value=" + miid +"]").find(".price").text());
+  //     // var oprice = document.getElementById(miid)
       
-  //     console.log(oprice);
+  //     // console.log(oprice);
   //     console.log($(this)[0].checked);
   //     var nprice = oprice;
   //     if ($(this)[0].checked === true) {

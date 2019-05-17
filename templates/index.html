@@ -1,5 +1,17 @@
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 <!DOCTYPE html>
+<style type="text/css">
+.login_table {
+  background-color: pink;
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+</style>
 <html>
   {% block head %}
     <head>
@@ -66,11 +78,23 @@
 
         <form action="{{url_for('staff_login')}}" method="POST">
           <div class="container">
-            <label for="staffId">Username</label>
-            <input name="staffId" id="staffId" type="text" placeholder="Enter Username" required>
+            <table class="login_table">
+              <tr>
+                <td><label class="labels" for="staffId">Username</label>
+                    <input name="staffId" id="staffId" type="text" placeholder="Enter Username" required>
+                </td>
+              </tr>
+              <tr>
+                <td><label class="labels" for="pwd"><b>Password</b></label>
+                    <input type="password" placeholder="Enter Password" name="pwd" id="pwd" required>
+                </td>
+              </tr>
+            </table>
+            <!--<label class="labels" for="staffId">Username</label>-->
+            <!--<input name="staffId" id="staffId" type="text" placeholder="Enter Username" required>-->
         
-            <label for="pwd"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="pwd" id="pwd" required>
+            <!--<label class="labels" for="pwd"><b>Password</b></label>-->
+            <!--<input type="password" placeholder="Enter Password" name="pwd" id="pwd" required>-->
                 
             <button type="submit">Login</button>  
           </div>
