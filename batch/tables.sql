@@ -4,6 +4,7 @@ create database if not exists tabtracker;
 
 use tabtracker;
 -- user table, staff table, user table, menuItem table, payment table, ingredient table, recipe table
+drop table if exists orderItems;
 drop table if exists orderItem;
 drop table if exists orders;
 drop table if exists recipe;
@@ -69,7 +70,7 @@ IGNORE 1 ROWS;
 create table user (
     username varchar(30),
     name varchar(30),
-    balanceOwed double,
+    balanceOwed double default 0,
     primary key (username)
 );
 

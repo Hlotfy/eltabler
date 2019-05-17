@@ -16,6 +16,17 @@ def getConn(db):
     return conn
 
 # returns the user's username if they are a staff member, else returns None
+def setDefaultPwd(conn,hashed):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('update staff set hashed=%s',(hashed,))
+    conn.commit()
+    return True
+    
+def allStaff(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select * from staff;')
+    return curs.fetchall()
+
 def login(conn,username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from staff where username=%s',(username,))
@@ -140,4 +151,5 @@ def getRecentPayments(conn,username):
 # for use in short testing
 if __name__ == '__main__':
     conn = getConn('tabtracker')
+    
     

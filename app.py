@@ -15,10 +15,19 @@ app.secret_key = 'asdflsgflawiewurhe'
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 
-# @app.before_request
+@app.before_first_request
 # def make_session_permanent():
 #     session.permanent = True
 #     app.permanent_session_lifetime = timedelta(minutes=1)
+def set_staff():
+    conn = functions.getConn('tabtracker')
+    password="databases"
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    functions.setDefaultPwd(conn,hashed)
+    staff = functions.allStaff(conn)
+    print staff
+    return staff
+    
 
 @app.route('/')
 # the index page of the app, which includes the staff login form
@@ -60,6 +69,7 @@ def staff_login():
     passwd = request.form['pwd']
     row = functions.login(conn,staffId)
     hashed = row['hashed']
+    print hashed
     if hashed and bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
         flash('successfully logged in as '+staffId)
         session['staffId'] = staffId
@@ -67,6 +77,7 @@ def staff_login():
         return redirect(url_for('tabs'))
     else:
         if not hashed:
+            flash('''no password!''')
             session['staffId'] = staffId
             session['currentOrders'] = {}
             return redirect(url_for('tabs'))
@@ -102,7 +113,8 @@ def order():
         
         return jsonify({'ingred':ingred, 'extra':extra})
     items = functions.getAllMenuItems(conn)
-    return render_template('order_form.html', items=items)
+    ingreds = functions.getAllIngredients(conn)
+    return render_template('order_form.html', items=items, ingreds=ingreds)
 
 @app.route('/access_tab', methods = ['POST'])
 # route which processes access to the selected user's tab, adding the username to the session and creating a sesion id for the session
@@ -187,12 +199,17 @@ def cart():
             print cart
             session['cart'] = cart
             return jsonify({'miid':miid,'quantity':cq})
+        else:
+            if request.form.get('extra'):
+                cart[miid]['extras'].append(request.form.get('name'))
+                print cart[miid]
+                session['cart'] = cart
+                return jsonify({'iname':cart[miid]['name'],'aname':cart[miid]['extras']})
         item = functions.getMenuItem(conn,miid)
         if miid in cart:
             cart[miid]['quantity'] += 1
         else:
-            #extras = {}
-            item['extras'] = {}
+            item['extras'] = []
             print item
             cart[miid] = item
         print cart
@@ -255,6 +272,8 @@ def payment(username):
         
                            
 if __name__ == '__main__':
+    #set_staff()
     app.debug = True
     app.run('0.0.0.0',8080)
+    
 
