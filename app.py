@@ -240,7 +240,7 @@ def payment(username):
         if not method:
             return jsonify({'error':True, 'err': "Please select a payment method."})
             
-         # make sure new payment will not drop balance below 0
+        # make sure new payment will not drop balance below 0
         currentBalance = functions.getUser(conn,username)['balanceOwed']
         if(currentBalance - amount < 0):
             return jsonify({'error':True, 'err': "Please enter an amount that is less than the current balance."})
@@ -262,5 +262,5 @@ def payment(username):
                            
 if __name__ == '__main__':
     app.debug = True
-    app.run('0.0.0.0',8081)
+    app.run('0.0.0.0',8080)
 
