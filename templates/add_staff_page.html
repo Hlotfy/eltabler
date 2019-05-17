@@ -23,14 +23,9 @@
 </form>
 </div>
 
-
-    
-
-
 <script>
 
 /* global $ */
-
 
 $("#changeform").on("click", function(event){  
     if($("#joinform")[0].style.display === "none") {
@@ -46,7 +41,7 @@ $("#changeform").on("click", function(event){
     }
     
 });
-// $("#changeform").addEventListener("click",toggle_func);
+
 var URL = "{{url_for('add_staff')}}";
 
 $("#joinform").on('submit', function (event) {
@@ -100,10 +95,6 @@ $("#changepwdform").on('submit', function (event) {
             'json');
      }
 });
-
-
-
-
 
 </script>
 {% endblock %}

@@ -21,6 +21,7 @@
         
         </p>
     <p><input type="submit" id="submit-btn" value="Submit"></p>
+    </form>
     
     {% if payments %}
 
@@ -31,6 +32,9 @@
         <p><span class="payments">{{p.dt}}</span>...............<span class="payments">{{p.method}}</span>...............<span class="payments">{{p.amount}}</span>
         </p>
     {% endfor %}
+    
+     {% endif %}
+     </div>
     <script>
     /* global $ */
         
@@ -73,9 +77,6 @@
         }
     </script>
     
-        
-    </div>
-    {% endif %}
-</form>
-    
+   
+
 {% endblock %}

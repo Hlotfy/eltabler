@@ -59,6 +59,7 @@ def staff_login():
     staffId = request.form['staffId']
     passwd = request.form['pwd']
     row = functions.login(conn,staffId)
+    
     hashed = row['hashed']
     if hashed and bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
         flash('successfully logged in as '+staffId)

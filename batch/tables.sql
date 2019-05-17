@@ -11,7 +11,6 @@ drop table if exists menuItem;
 drop table if exists ingredient;
 drop table if exists payments;
 drop table if exists staff;
-drop table if exists session;
 drop table if exists user;
 
 create table menuItem (
@@ -69,7 +68,7 @@ IGNORE 1 ROWS;
 create table user (
     username varchar(30),
     name varchar(30),
-    balanceOwed double,
+    balanceOwed double default 0,
     primary key (username)
 );
 
