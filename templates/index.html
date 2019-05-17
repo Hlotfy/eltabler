@@ -11,12 +11,12 @@
     {% if session['staffId'] %}
     <div class="navbar">
         
-          <!-- <li id="lmbar"><a href="">Inventory</a></li> -->
           <label>
           <li id="lmbar"><a href="{{url_for('current_orders')}}">Current Orders</a></li>
           <li id="lmbar"><a href="{{url_for('order', username=session['username'])}}">Menu</a></li>
           <li id="lmbar"><a href="{{url_for('tabs')}}">User Tabs</a></li>
           <li id="lmbar"><a href="{{url_for('add_staff')}}">Add Staff Member</a></li>
+          <li id="lmbar"><a href="{{url_for('inventory')}}">Inventory</a></li>
           </label>
           
           {% if session['username'] %}
