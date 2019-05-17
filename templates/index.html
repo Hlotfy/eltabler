@@ -1,15 +1,40 @@
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 <!DOCTYPE html>
 <style type="text/css">
-.login_table {
-  background-color: pink;
-  border: none;
-  color: white;
+table {
+  /*background-color: pink;*/
+  color: black;
   padding: 10px 20px;
   text-align: center;
-  text-decoration: none;
-  display: inline-block;
   font-size: 16px;
+}
+.labels{
+   font-size: 20px;
+   font-weight:none;
+}
+th, td {
+  padding: 10px;
+}
+.center-align {
+  text-align: center;
+}
+.login-btn{
+  background-color: white;
+  border: solid pink;
+  color: pink;
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.login-input {
+  border: none;
+  border-bottom: 2px solid pink;
+}
+input::placeholder{
+  font-style:italic;
 }
 </style>
 <html>
@@ -74,29 +99,28 @@
         <div id="content", align="center">
         {% block content %}
         <br><br>
-        <h2>Login Form</h2>
+        
 
         <form action="{{url_for('staff_login')}}" method="POST">
           <div class="container">
-            <table class="login_table">
+            <table>
               <tr>
-                <td><label class="labels" for="staffId">Username</label>
-                    <input name="staffId" id="staffId" type="text" placeholder="Enter Username" required>
+                <th class="center-align"><h2>Login Form</h2></th>
+              </tr>
+              <tr>
+                <td>
+                  <label class="labels" for="staffId">Username</label>
+                  <input class="login-input" name="staffId" id="staffId" type="text" placeholder="Enter Username" required>
                 </td>
               </tr>
               <tr>
-                <td><label class="labels" for="pwd"><b>Password</b></label>
-                    <input type="password" placeholder="Enter Password" name="pwd" id="pwd" required>
-                </td>
+                <td><label class="labels" for="pwd">Password</label>
+                <input class="login-input" type="password" placeholder="Enter Password" name="pwd" id="pwd" required></td>
+              </tr>
+              <tr>
+                <td class=center-align><button class="login-btn" type="submit">Login</button> </td>
               </tr>
             </table>
-            <!--<label class="labels" for="staffId">Username</label>-->
-            <!--<input name="staffId" id="staffId" type="text" placeholder="Enter Username" required>-->
-        
-            <!--<label class="labels" for="pwd"><b>Password</b></label>-->
-            <!--<input type="password" placeholder="Enter Password" name="pwd" id="pwd" required>-->
-                
-            <button type="submit">Login</button>  
           </div>
         </form>
         {% endblock %}
