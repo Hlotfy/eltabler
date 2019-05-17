@@ -61,7 +61,18 @@ def add_staff():
             return jsonify({'error':True, 'err':err})
     else:
         return render_template('add_staff_page.html')
-        
+
+@app.route('/remove_staff/',  methods = ['POST','GET'])
+def remove_staff():
+    conn = functions.getConn('tabtracker')
+    users = functions.getAllUsers(conn)
+    staffMembers = functions.getAllStaff(conn)
+ 
+    staffId = request.form.get('username')
+    password = request.form.get('password')
+    is_removed = functions.removeStaffMember(conn, staffId)
+    
+    return render_template('remove_staff_page.html', users=users, staffMembers = staffMembers)             
 
 @app.route('/staff_login/',  methods = ['POST'])
 # route which processes the staff login and adds the username to the session
@@ -321,5 +332,3 @@ if __name__ == '__main__':
     #set_staff()
     app.debug = True
     app.run('0.0.0.0',8080)
-    
-
