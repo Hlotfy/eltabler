@@ -1,19 +1,23 @@
 #!/usr/local/bin/python2.7
 
 import sys, os
-import MySQLdb
+os.system(". ../venv/bin/activate")
+# import MySQLdb
 
-def getConn(db):
-    conn = MySQLdb.connect(host='localhost',
-                           user='ubuntu',
-                           passwd='',
-                           db=db)
-    return conn
+# def getConn(db):
+#     conn = MySQLdb.connect(host='localhost',
+#                           user='ubuntu',
+#                           passwd='',
+#                           db=db)
+#     return conn
 
-os.system('mysql-ctl start')
+# def run_batch():
+    
+#     os.system('mysql-ctl start')
+#     os.system('mysql --local-infile < "./batch/tables.sql"')
 
-os.system('mysql --local-infile < "./batch/tables.sql"')
-
-conn = getConn('tabtracker')
-
-curs = conn.cursor(MySQLdb.cursors.DictCursor)
+   
+# if __name__ == '__main__':
+#     # conn = getConn('tabtracker')
+#     # curs = conn.cursor(MySQLdb.cursors.DictCursor)
+#     run_batch()

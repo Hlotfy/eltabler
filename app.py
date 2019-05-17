@@ -15,10 +15,19 @@ app.secret_key = 'asdflsgflawiewurhe'
 # This gets us better error messages for certain common request errors
 app.config['TRAP_BAD_REQUEST_ERRORS'] = True
 
-# @app.before_request
+@app.before_first_request
 # def make_session_permanent():
 #     session.permanent = True
 #     app.permanent_session_lifetime = timedelta(minutes=1)
+def set_staff():
+    conn = functions.getConn('tabtracker')
+    password="databases"
+    hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    functions.setDefaultPwd(conn,hashed)
+    staff = functions.allStaff(conn)
+    print staff
+    return staff
+    
 
 @app.route('/')
 # the index page of the app, which includes the staff login form
@@ -32,6 +41,8 @@ def index():
 
 @app.route('/add_staff/',  methods = ['POST','GET'])
 def add_staff():
+    if not session.get('staffId'):
+        return redirect(url_for('index'))
     conn = functions.getConn('tabtracker')
     if request.method=='POST':
         try:
@@ -60,6 +71,7 @@ def staff_login():
     passwd = request.form['pwd']
     row = functions.login(conn,staffId)
     hashed = row['hashed']
+    print hashed
     if hashed and bcrypt.hashpw(passwd.encode('utf-8'),hashed.encode('utf-8')) == hashed:
         flash('successfully logged in as '+staffId)
         session['staffId'] = staffId
@@ -67,6 +79,7 @@ def staff_login():
         return redirect(url_for('tabs'))
     else:
         if not hashed:
+            flash('''no password!''')
             session['staffId'] = staffId
             session['currentOrders'] = {}
             return redirect(url_for('tabs'))
@@ -84,6 +97,8 @@ def staff_logout():
 @app.route('/tabs/')
 # route which renders the user tabs page which all current usernames
 def tabs():
+    if not session.get('staffId'):
+        return redirect(url_for('index'))
     if session.get('username'):
         print leave_tab()
     conn = functions.getConn('tabtracker')
@@ -93,6 +108,8 @@ def tabs():
 @app.route('/menu/', methods = ['POST', 'GET'])
 #route which renders the menu page which all current menu items
 def order():
+    if not session.get('staffId'):
+        return redirect(url_for('index'))
     conn = functions.getConn('tabtracker')
     if request.method=='POST':
         miid = request.form.get('miid')
@@ -102,11 +119,14 @@ def order():
         
         return jsonify({'ingred':ingred, 'extra':extra})
     items = functions.getAllMenuItems(conn)
-    return render_template('order_form.html', items=items)
+    ingreds = functions.getAllIngredients(conn)
+    return render_template('order_form.html', items=items, ingreds=ingreds)
 
 @app.route('/access_tab', methods = ['POST'])
 # route which processes access to the selected user's tab, adding the username to the session and creating a sesion id for the session
 def access_tab(username):
+    if not session.get('staffId'):
+        return redirect(url_for('index'))
     print username
     conn = functions.getConn('tabtracker')
     #sessId = functions.newSession(conn,username)
@@ -130,6 +150,8 @@ def leave_tab():
 # add safeguard so you don't create an order with no order items
 # delete orders with no order items
 def recent_orders(username):
+    if not session.get('staffId'):
+        return redirect(url_for('index'))
     conn = functions.getConn('tabtracker')
     if not session.get('username'):
         access_tab(username)
@@ -164,6 +186,8 @@ def recent_orders(username):
 # add safeguard so you don't create an order with no order items
 # delete orders with no order items
 def current_orders():
+    if not session.get('staffId'):
+        return redirect(url_for('index'))
     if request.method=="POST":
         username = request.form.get('username')
         print session['currentOrders']
@@ -176,6 +200,8 @@ def current_orders():
 @app.route('/cart/', methods=['GET','POST'])
 # keeps track of all selected menu items for current session and renders cart template
 def cart():
+    if not session.get('staffId'):
+        return redirect(url_for('index'))
     print session['cart']
     conn = functions.getConn('tabtracker')
     cart  = session['cart']
@@ -193,12 +219,17 @@ def cart():
             print cart
             session['cart'] = cart
             return jsonify({'miid':miid,'quantity':cq})
+        else:
+            if request.form.get('extra'):
+                cart[miid]['extras'].append(request.form.get('name'))
+                print cart[miid]
+                session['cart'] = cart
+                return jsonify({'iname':cart[miid]['name'],'aname':cart[miid]['extras']})
         item = functions.getMenuItem(conn,miid)
         if miid in cart:
             cart[miid]['quantity'] += 1
         else:
-            #extras = {}
-            item['extras'] = {}
+            item['extras'] = []
             print item
             cart[miid] = item
         print cart
@@ -209,6 +240,8 @@ def cart():
     
 @app.route('/clearCart/', methods=['POST'])
 def clearCart():
+    if not session.get('staffId'):
+        return redirect(url_for('index'))
     conn = functions.getConn('tabtracker')
     session['cart']={}
     return redirect(url_for('cart'))
@@ -216,6 +249,8 @@ def clearCart():
 @app.route('/<username>/payment/', methods=['GET','POST'])
 # accesses payment history for selected user and allows payments to be made to user's tab balance
 def payment(username):
+    if not session.get('staffId'):
+        return redirect(url_for('index'))
     conn = functions.getConn('tabtracker')
     user = functions.getUser(conn,username)
     if request.method == 'GET':
@@ -261,6 +296,8 @@ def payment(username):
         
                            
 if __name__ == '__main__':
+    #set_staff()
     app.debug = True
     app.run('0.0.0.0',8080)
+    
 
