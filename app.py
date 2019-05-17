@@ -293,6 +293,28 @@ def payment(username):
             return jsonify({'error':False,'method':method,'amount':amount,'newBalance':newBalance,'user':name,'dt':dt})
         except Exception as err:
             return jsonify({'error':True, 'err':str(err)})
+
+@app.route('/inventory/', methods = ['GET','POST'])
+def inventory():
+    conn = functions.getConn('tabtracker')
+    categories = functions.getIngredientKinds(conn)
+    ingredients = functions.getAllIngredients(conn)
+    if request.method == 'GET':
+        return render_template('inventory.html',kinds=categories,ingredients=ingredients)
+    elif request.method == 'POST':
+        ingred_id = request.form.get('ingredient')
+        quantity = request.form.get('quantity')
+        try:
+            # convert to float to type check and to insert into database
+            quantity = int(quantity)
+        except ValueError:
+            return jsonify({'error':True, 'err':"Please enter an integer."})
+        # make sure the employee enters an ingredient
+        if not ingred_id:
+            return jsonify({'error':True, 'err': "Please select an ingredient."})
+        
+        ingredient = functions.updateQuantity(conn,ingred_id,quantity)
+        return jsonify({'error':False,'name':ingredient['name'],'quantity':ingredient['quantity'],'ingred_id':ingredient['iid']})
         
                            
 if __name__ == '__main__':
