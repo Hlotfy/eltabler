@@ -66,6 +66,8 @@
     
 </div>
 <script>
+/* global $ */
+
 var acc = document.getElementsByClassName("accordion");
 var i;
 
@@ -80,6 +82,13 @@ for (i = 0; i < acc.length; i++) {
     } 
   });
 }
+
+ $(".remove-btn").on("click", function(event){
+      var miid = $(this).closest(".quantity").find("#miid").val();
+      $(this).parent().parent().remove(); 
+      // .closest(".quantity").remove();
+    //   changeQuant(miid,0);
+    });
 </script>
 
 {% endblock %}

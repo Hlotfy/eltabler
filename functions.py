@@ -90,7 +90,7 @@ def getIngredients(conn, menuItemId):
 # Updates the payments table, and the user's current balance in the user table
 def makePayment(conn,username,method,amount,dt):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    #update the user's balance owed atomically :)
+    #update the user's balance owed atomically
     curs.execute('update user set balanceOwed = (select * from (select balanceOwed - %s from user where username=%s) as t1) where username = %s;',(amount,username,username,))
     curs.execute('select balanceOwed from user where username = %s',(username,))
     newBalance = curs.fetchone()['balanceOwed']

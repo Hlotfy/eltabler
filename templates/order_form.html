@@ -75,13 +75,16 @@ th, td, tr {
         {% for item in items %}
           {% if item.kind == "sandwich" %}
             <tr value={{item.miid}}>
+             
             <td id="b" class="name">{{item.name}}</td>
             <td id="b2" class="price">{{item.price}}</td>
             <td>
+              <label>Add
               <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
+              </label>
             </td>
             <td>
-              <button class ="customize" type="button" id="customMenu" onclick="openNav(this.value)" value={{item.miid}}> Customize
+              <button class ="customize" type="button" id="customMenu" onclick="openNav(this.value)" value={{item.miid}}>Customize
               </button></td>
             </tr>
 
@@ -90,7 +93,9 @@ th, td, tr {
             <td class="name">{{item.name}}</td>
             <td class="price">$ {{item.price}}</td>
             <td>
+              <label>Add
               <input class ="checkboxBigger" type="checkbox" id="cb" value={{item.miid}}></input>
+              </label>
             </td>  
             </tr>
           {% elif item.kind == "candy" %}
@@ -98,22 +103,29 @@ th, td, tr {
             <td class="name">{{item.name}}</td>
             <td class="price">$ {{item.price}}</td>
             <td>
+              <label>Add
               <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
+              </label>
             </td>
             </tr>
           {% elif item.kind == "snack" %}
             <tr miid={{item.miid}}>
             <td class="name">{{item.name}}</td>
-            <td class="price">$ {{item.price}}</td>
+            <td class="price">{{item.price}}</td>
             <td>
+              <label>Add
               <input class ="checkboxBigger"  type="checkbox" id="cb" value="{{item.miid}}"></input>
+              </label>
             </td>
             </tr>
           {% endif %}
         {% endfor %}
         </table>
        <br>
+       <label>
       Total Price: <input type="text" name="subtotal" value="0" />
+      </label>
+      
       <br><button type="submit">Checkout!</button>
       </form>
     </div>

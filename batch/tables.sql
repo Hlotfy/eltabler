@@ -4,6 +4,9 @@ create database if not exists tabtracker;
 
 use tabtracker;
 -- user table, staff table, user table, menuItem table, payment table, ingredient table, recipe table
+drop table if exists cart;
+drop table if exists session;
+drop table if exists sessions;
 drop table if exists orderItems;
 drop table if exists orderItem;
 drop table if exists orders;
@@ -12,7 +15,6 @@ drop table if exists menuItem;
 drop table if exists ingredient;
 drop table if exists payments;
 drop table if exists staff;
-drop table if exists session;
 drop table if exists user;
 
 create table menuItem (

@@ -11,25 +11,28 @@
     {% if session['staffId'] %}
     <div class="navbar">
         
-          <li id="lmbar"><a href="">Inventory</a></li>
-          <li id="lmbar"><a href="">Current Orders</a></li>
+          <!-- <li id="lmbar"><a href="">Inventory</a></li> -->
+          <label>
+          <li id="lmbar"><a href="{{url_for('current_orders')}}">Current Orders</a></li>
           <li id="lmbar"><a href="{{url_for('order', username=session['username'])}}">Menu</a></li>
           <li id="lmbar"><a href="{{url_for('tabs')}}">User Tabs</a></li>
           <li id="lmbar"><a href="{{url_for('add_staff')}}">Add Staff Member</a></li>
+          </label>
           
           {% if session['username'] %}
           
           <div class="dropdown">
-             <button class="dropbtn" onclick="drop_menu()">{{session['username']}}</a>
+            <label>
+             <button name="dropbtn" class="dropbtn" onclick="drop_menu()">{{session['username']}}</a>
                 <i class="fa fa-caret-down"></i>
-              </button>
+              </button></label>
                <div class="dropdown-content" id="user_dd">
-                <a href="{{url_for('payment',username=session['username'])}}">Payment</a>
-                <a href="{{url_for('recent_orders',username=session['username'])}}">Recent Orders</a>
-                <a href="{{url_for('cart', username=session['username'])}}">Cart</a>
+                <label><a href="{{url_for('payment',username=session['username'])}}">Payment</a></label>
+                <label><a href="{{url_for('recent_orders',username=session['username'])}}">Recent Orders</a></label>
+                <label><a href="{{url_for('cart', username=session['username'])}}">Cart</a></label>
                 
                 <form id="logout_btn" action="{{url_for('leave_tab')}}" method="POST">
-                    <a href="#" onclick="document.getElementById('logout_btn').submit()">Logout</a>
+                    <a href="#" onclick="document.getElementById('logout_btn').submit()"><label>Logout</label></a>
                 </form>
               </div>
            </div>
@@ -63,11 +66,11 @@
 
         <form action="{{url_for('staff_login')}}" method="POST">
           <div class="container">
-            <label for="staffId"><b>Username</b></label>
-            <input name="staffId" type="text" placeholder="Enter Username" required>
+            <label for="staffId">Username</label>
+            <input name="staffId" id="staffId" type="text" placeholder="Enter Username" required>
         
             <label for="pwd"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="pwd" required>
+            <input type="password" placeholder="Enter Password" name="pwd" id="pwd" required>
                 
             <button type="submit">Login</button>  
           </div>
