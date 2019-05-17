@@ -2,17 +2,79 @@
 {% extends "index.html" %}
 {% block content %}
 
+<div id="errors"></div>
+
 <h1>Inventory</h1>
+
+<h2>Add more of an ingredient</h2>
+<div id="newInventoryInfo"></div>
+<form method="POST" action="">
+    <p><label for="ingredient">Select an ingredient:</label>
+        <select id="ingredient" name="ingredient">
+            <option value="" disabled selected>Ingredient name</option>
+            {% for item in ingredients %}
+                <option value={{item['iid']}}>{{item['name']}}</option>
+            {% endfor %}
+        </select>
+    </p>
+    <p><label for="quantity">Enter a quantity:</label>
+        <input type="text" id="quantity" name="quantity">
+    </p>
+    <p><input type="button" id="submit-btn" value="Submit"></p>
+    </form>
+
 <div id="ingredients-list">
+    <h2>Current quantities</h2>
     {% for category in kinds %}
-        <h2>{{category['kind']}}</h2>
+    <div id={{category['kind']}}>
+        <h3>{{category['kind']}}</h2>
         {% for item in ingredients %}
             {% if item['kind'] == category['kind'] %}
-                <p>{{item['name']}}..........{{item['quantity']}}</p>
+                <div id={{item['iid']}}>
+                    <p>{{item['name']}}...............{{item['quantity']}}</p>
+                </div>
             {% endif %}
         {% endfor %}
+    </div>
+    
     {% endfor %}
     
 </div>
+
+<script>
+/* global $ */
+
+    var URL = "{{url_for('inventory')}}";
+    $("#submit-btn").on("click", function (event) {
+            event.preventDefault();  // prevent default form submission
+            var ingred = $("#ingredient").val();
+            var quantity = $("#quantity").val();
+            // convert the current datetime to something useable by the database
+            sendUpdate(ingred,quantity);
+        });
+        
+    function sendUpdate(ingred,quantity){
+        console.log("Sending update with ingredient: " + ingred + " and quantity: " + quantity);
+        $.post(URL, {'ingredient':ingred,'quantity':quantity},updatePage);
+    }
+    
+    function updatePage(ingred){
+        $("#newInventoryInfo").empty();
+        $("#errors").empty();
+        if(ingred.error){
+            $("<p>")
+                .text('Error: '+ingred.err)
+                .prependTo("#errors")
+        }else{
+            $("<p style = color:red>")
+                .text("New " + ingred.name + " quantity: " + ingred.quantity)
+                .prependTo("#newInventoryInfo");
+            $("#"+ingred.ingred_id)
+                .html("<p style = color:red>" + ingred.name + "..............." + ingred.quantity + "</p>");
+        }
+    }
+    
+    
+</script>
 
 {% endblock %}
