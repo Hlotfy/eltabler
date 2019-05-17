@@ -276,7 +276,14 @@ def payment(username):
             return jsonify({'error':False,'method':method,'amount':amount,'newBalance':newBalance,'user':name,'dt':dt})
         except Exception as err:
             return jsonify({'error':True, 'err':str(err)})
-        
+
+@app.route('/inventory/', methods = ['GET','POST'])
+def inventory():
+    conn = functions.getConn('tabtracker')
+    if request.method == 'GET':
+        inventory = functions.getAllIngredients(conn)
+        categories = functions.getIngredientKinds(conn)
+        return render_template('inventory.html',ingredients=inventory,kinds=categories)
                            
 if __name__ == '__main__':
     app.debug = True

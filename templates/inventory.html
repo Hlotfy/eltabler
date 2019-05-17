@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+{% extends "index.html" %}
+{% block content %}
+
+<h1>Inventory</h1>
+<div id="ingredients-list">
+    {% for category in kinds %}
+        <h2>{{category['kind']}}</h2>
+        {% for item in ingredients %}
+            {% if item['kind'] == category['kind'] %}
+                <p>{{item['name']}}..........{{item['quantity']}}</p>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+    
+</div>
+
+{% endblock %}
