@@ -82,9 +82,9 @@ def getAllIngredients(conn):
     return curs.fetchall()
 
 # Gets the ingredients of a given menu item
-def getIngredients(conn, menuItemId):
+def getIngredients(conn, miid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select * from ingredient inner join recipe using (iid) where miid = %s', (menuItemId,))
+    curs.execute('select * from ingredient inner join recipe using (iid) where miid = %s', (miid,))
     return curs.fetchall()
 
 # Updates the payments table, and the user's current balance in the user table
@@ -128,7 +128,10 @@ def addOrderItems(conn,item,oid):
     print item
     curs.execute('insert into orderItem(oid,miid,quantity) values(%s,%s,%s)',(oid,item['miid'],item['quantity']))
     conn.commit()
-    return True
+    curs.execute('update ingredient set quantity=quantity-%s where iid in (select iid from recipe where miid=%s);',(item['quantity'],item['miid']))
+    conn.commit()
+    curs.execute('select name, quantity from ingredient where iid in (select iid from recipe where miid=%s);',(item['miid'],))
+    return curs.fetchall()
     
 # fetches a user's recent orders based on their username
 def getRecentOrders(conn, user):
@@ -147,9 +150,15 @@ def getRecentPayments(conn,username):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from payments where username = %s order by dt DESC;',(username,))
     return curs.fetchall()
+    
+# def getIngredientQuantity(conn,miid):
+#     curs = conn.cursor(MySQLdb.cursors.DictCursor)
+#     curs.execute('select i.iid, i.quantity from ingredient i right join recipe r using (iid) where r.miid=%s',(miid,))
+#     return curs.fetchall()
 
 # for use in short testing
 if __name__ == '__main__':
     conn = getConn('tabtracker')
+    print(getIngredientQuantity(conn,15))
     
     

@@ -114,7 +114,7 @@ def order():
     if request.method=='POST':
         miid = request.form.get('miid')
         ingred = functions.getIngredients(conn,miid)
-        print ingred
+        #print ingred
         extra = functions.getAllIngredients(conn)
         
         return jsonify({'ingred':ingred, 'extra':extra})
@@ -158,10 +158,8 @@ def recent_orders(username):
     if request.method == 'POST':
         form = request.form.to_dict(flat=False)
         if form:
-            print form
-            form = [{form.keys()[j]: form.values()[j][i] for j in range(len(form))} for i in range(len(form.values()[0]))]
-            print form
             
+            form = [{form.keys()[j]: form.values()[j][i] for j in range(len(form))} for i in range(len(form.values()[0]))]
             functions.addOrder(conn,form,username)
             orders = functions.getRecentOrders(conn,username)
             items = functions.getOrderItems(conn,username)
@@ -172,14 +170,14 @@ def recent_orders(username):
                 session['currentOrders'][session['username']] = session['cart']
             print session['currentOrders'][session['username']]
             clearCart()
-            return render_template('recent_orders.html',orders=orders, items=items, user=user)
+            return render_template('recent_orders.html', orders=orders, items=items, user=user)
         else:
             return redirect(request.referrer)
 
     orders = functions.getRecentOrders(conn,username)
     items = functions.getOrderItems(conn,username)
     user = functions.getUser(conn,username)
-    return render_template('recent_orders.html',orders=orders, items=items, user=user)
+    return render_template('recent_orders.html', orders=orders, items=items, user=user)
 
 @app.route('/current_orders/',  methods = ['POST', 'GET'])
 # creates order, adds selected menu items to cart
@@ -188,13 +186,18 @@ def recent_orders(username):
 def current_orders():
     if not session.get('staffId'):
         return redirect(url_for('index'))
-    if request.method=="POST":
+    if request.method=='POST':
         username = request.form.get('username')
-        print session['currentOrders']
-        session['currentOrders'][username].pop()
-        print session['currentOrders']
-        return jsonify({'success':True})
-    print session['currentOrders']
+        print session['currentOrders'][username]
+        order = session['currentOrders']
+        order.pop(username)
+        session['currentOrders'] = order
+        if username in session['currentOrders']:
+            return jsonify({'success':False})
+        else:
+            
+            return jsonify({'success':True})
+    # print session['currentOrders']
     return render_template('current_orders_page.html')
 
 @app.route('/cart/', methods=['GET','POST'])
@@ -202,11 +205,18 @@ def current_orders():
 def cart():
     if not session.get('staffId'):
         return redirect(url_for('index'))
-    print session['cart']
+    # print session['cart']
     conn = functions.getConn('tabtracker')
     cart  = session['cart']
     if request.method == 'POST':
         miid=request.form.get('miid')
+        price = request.form.get('price')
+        form = request.form.to_dict(flat=False)
+        if 'extras[]' in form:
+            print form
+            # print form['quantity']
+            print form['extras[]']
+            print form['exclude[]']
         if request.form.get('quantity'):
             newQuantity=request.form.get('quantity')
             if int(newQuantity)==0:
@@ -216,21 +226,22 @@ def cart():
                 return jsonify({'miid':miid,'quantity':True})
             cart[miid]['quantity'] = newQuantity
             cq = cart[miid]['quantity']
-            print cart
+            # print cart
             session['cart'] = cart
             return jsonify({'miid':miid,'quantity':cq})
-        else:
-            if request.form.get('extra'):
-                cart[miid]['extras'].append(request.form.get('name'))
-                print cart[miid]
-                session['cart'] = cart
-                return jsonify({'iname':cart[miid]['name'],'aname':cart[miid]['extras']})
         item = functions.getMenuItem(conn,miid)
         if miid in cart:
+            cart[miid]['quantity'] = int(cart[miid]['quantity'])
+            cart[miid]['price'] = price
             cart[miid]['quantity'] += 1
         else:
-            item['extras'] = []
-            print item
+            print "adding item to cart!!"
+            if item['kind'] == "sandwich":
+                item['extras'] = form['extras[]']
+                item['exclude'] = form['exclude[]']
+                item['price'] = price
+                item['quantity'] = int(item['quantity'])
+                print item
             cart[miid] = item
         print cart
         session['cart'] = cart

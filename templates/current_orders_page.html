@@ -3,91 +3,94 @@
 {% extends "index.html" %}
 
 {% block content %}
-
+<style>
+    table, th, td {
+      border: 1px solid black;
+      /*width:60%;*/
+}
+</style>
 <div class="main">
 
 
 <h2>Current Orders</h2>
-<p>Click on the order to see details.</p>
+<h3>Current Orders Below. Yell out the person's name when their order is ready and clear their order box!</h3>
 </div>
 <div class="center">
-    
-    <!--<button class="accordion"-->
-<table>
 
-    
 {% for username in session['currentOrders'] %}
-<tr class="orderBox">
-        <th>{{username}}</th>
-        <td></td>
-        <td><button class="remove-btn" type="button" name="button">
+<div class="orderBox">
+    <h2>{{username}}</h2>
+    <button class="remove-btn" type="button" name="button">
                 <img src="{{ url_for('static', filename='delete-icn.svg') }}" alt="" />
-              </button></td>
-        <td>
+              </button>
+<table>
+    <tr>
+        <th>Item</th>
+        <th>Quantity</th>
+        <th>Customization </th>
+        
+        
 {% for item in session['currentOrders'][username].iterkeys() %}
         <tr class="boxed">
         
         <td>{{session['currentOrders'][username][item]['name']}}</td>
         <td>{{session['currentOrders'][username][item]['quantity']}}</td>
-            {% if extras in session['currentOrders'][username][item] %}
-            <td>Customized: 
-                <td>
-                    {% for extra in session['currentOrders'][username][item].iterkeys() %}
-                    <td>{{extra}}: </td>
-                    <td>{{session['currentOrders'][username][item][extra]}}</td>
+        {% if session['currentOrders'][username][item]['extras'] != None %}
+        {% if (session['currentOrders'][username][item]['extras']|length) > 1 %}
+         <td>Custom</td>  
+                
+                    {% for i in range(0,(session['currentOrders'][username][item]['extras']|length)) %}
+                    <tr><td></td><td></td>
+                    <td>{{session['currentOrders'][username][item]['extras'][i]}}</td>
+                    </tr>
                     {% endfor %}
-                </td></td>
-                {% endif %}
-        <td>{{session['currentOrders'][username][item]['kind']}}</td>
+                
+        
+        {% endif %}
+        {% endif %}
+        
+        {% if session['currentOrders'][username][item]['include'] != None %}
+        {% if (session['currentOrders'][username][item]['include']|length) > 0 %}
+        
+                    {% for i in range(0,(session['currentOrders'][username][item]['include']|length)) %}
+                    <tr><td></td><td></td>
+                    <td><b>No {{session['currentOrders'][username][item]['include'][i]}}</b></td>
+                    </tr>
+                    {% endfor %}
+        
+        {% endif %}
+        {% endif %}
+        </tr>
         </tr>
 
 {% endfor %}
 
     </td>
 </tr>
-{% endfor %}
-
-
 </table>
-<!--</button>-->
-<!--    {% for item in items %}-->
-<!--<div class="panel">-->
-<!--    <table>-->
-<!--        {% if item.oid == order.oid %}-->
-<!--        <tr>-->
-<!--            <td>{{item.name}}</td>-->
-<!--            <td>${{item.item_total}}</td>-->
-<!--            <td>{{item.quantity}}</td>-->
-        
-<!--        {% endif %}-->
-<!--    {% endfor %}-->
-<!--        </tr>-->
-
+</div>
+{% endfor %}
     
 </div>
 <script>
 /* global $ */
+var URL = "{{url_for('current_orders')}}";
 
-var acc = document.getElementsByClassName("accordion");
-var i;
-
-for (i = 0; i < acc.length; i++) {
-  acc[i].addEventListener("click", function() {
-    this.classList.toggle("active");
-    var panel = this.nextElementSibling;
-    if (panel.style.maxHeight){
-      panel.style.maxHeight = null;
-    } else {
-      panel.style.maxHeight = panel.scrollHeight + "px";
-    } 
-  });
-}
 
  $(".remove-btn").on("click", function(event){
-      var miid = $(this).closest(".quantity").find("#miid").val();
-      $(this).parent().parent().remove(); 
-      // .closest(".quantity").remove();
-    //   changeQuant(miid,0);
+      var username = $(this).parent().find("h2").text();
+      console.log(username);
+      var box = $(this).parent();
+      $.post(URL,{'username':username},function(resp) { 
+                if (resp.success===true){
+                    box.remove();
+                    
+                } else {
+                    alert("error!");
+                }
+            },
+            'json');
+      
     });
 </script>
 

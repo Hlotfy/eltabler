@@ -43,23 +43,31 @@ th, td, tr {
                   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
                   <h1></h1>
                   <table id="ingredList">
-                    <tr><h2>included:</h2></tr>
+                    <tr><h2>includes:</h2></tr>
                   </table>
                   
                   <br><table id="extraList"> 
-                  <tr><td>Item Price: <input type="text" name="sum" value="0"></td></tr>
+                  <tr>
+                    <td>Item Price: <input type="text" id="sum" placeholder=""></td>
+                    <td><input id="addCust" type="submit" value="Add to Cart!"></input></td>
+                    </tr>
                     <tr><h2>add ons:</h2></tr>
                     {% for ingred in ingreds %}
                       <tr>
-                        <td class="name">{{ingred.name}}</td> 
+                        {% if ingred.quantity <= 0 %}
+                        <td class="name"> <b>OUT OF STOCK</b> <s>{{ingred.name}}</s></td> 
+                        <td>  <input id="ex" class ="calc" type="checkbox" value="{{ingred.price}}" disabled><s>${{ingred.price}}</s></input> </td> 
+                        {% else %}
+                         <td class="name">{{ingred.name}}</td>
                         <td> <input class ="calc" type="checkbox" value="{{ingred.price}}">${{ingred.price}}</input> </td> 
+                        {% endif %}
                       </tr>
                     {% endfor %}  
                       
                   </table>
                   
-                  
                 </div>
+                
   <div id="main">
   <h1>El Table Menu Items</h1>
   <p><strong>Please Select 1 or More Menu Items to Add to Order</strong></p>
@@ -74,48 +82,48 @@ th, td, tr {
         </tr>
         {% for item in items %}
           {% if item.kind == "sandwich" %}
-            <tr value={{item.miid}}>
+            <tr value="{{item.miid}}">
              
             <td id="b" class="name">{{item.name}}</td>
             <td id="b2" class="price">{{item.price}}</td>
             <td>
-              <label>Add
+              
               <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
-              </label>
+              
             </td>
             <td>
-              <button class ="customize" type="button" id="customMenu" onclick="openNav(this.value)" value={{item.miid}}>Customize
+              <button class ="customize" type="button" id="customMenu" onclick="openNav(this,this.value)" value={{item.miid}}>Select
               </button></td>
             </tr>
 
           {% elif item.kind == "drink" %}
-            <tr miid={{item.miid}}>
+            <tr value="{{item.miid}}">
             <td class="name">{{item.name}}</td>
             <td class="price">$ {{item.price}}</td>
-            <td>
-              <label>Add
-              <input class ="checkboxBigger" type="checkbox" id="cb" value={{item.miid}}></input>
-              </label>
+            <td class="miid" value="{{item.miid}}">
+               
+              <input  miid ="{{item.miid}}" id="addCust" type="submit" value="Add to Cart!">
+              
             </td>  
             </tr>
           {% elif item.kind == "candy" %}
-            <tr miid={{item.miid}}>
+            <tr value={{item.miid}}>
+            
             <td class="name">{{item.name}}</td>
             <td class="price">$ {{item.price}}</td>
-            <td>
-              <label>Add
-              <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
-              </label>
+            <td class="miid" value="{{item.miid}}">
+              <input  miid ="{{item.miid}}" id="addCust" type="submit" value="Add to Cart!">
+              
             </td>
             </tr>
           {% elif item.kind == "snack" %}
-            <tr miid={{item.miid}}>
+            <tr value={{item.miid}}>
             <td class="name">{{item.name}}</td>
-            <td class="price">{{item.price}}</td>
-            <td>
-              <label>Add
-              <input class ="checkboxBigger"  type="checkbox" id="cb" value="{{item.miid}}"></input>
-              </label>
+            <td class="price">$ {{item.price}}</td>
+            <td class="miid" value="{{item.miid}}">
+              <!--<label for="addCust">Add To Cart!</label>-->
+              <input miid ="{{item.miid}}" id="addCust" type="submit" value="Add to Cart!">
+              
             </td>
             </tr>
           {% endif %}
@@ -138,29 +146,53 @@ th, td, tr {
 var URL = "{{url_for('cart')}}";
 var URLm = "{{url_for('order')}}"
 
-  $("#menuItems").on(
-    "click", "input[type=checkbox]",
+var exclude = ["Null"];
+var extras = ["Null"];
+
+  $("#extraList").on(
+    "click", "input[type=submit]",
     function(event) {
-      var name = $(this).closest("tr").find(".name").text();
-      var price = $(this).closest("tr").find(".price").text();
-      console.log(name)
-      var miid = $(this).val();
-      $.post(URL,{'miid':miid, 'name':name, 'price':price},function(resp) { 
+      
+      var price = $(this).closest("tr").find("#sum").val()[0];
+      // var price = $(this).closest("tr").find(".price").text();
+      console.log(price);
+      var miid = $(this).closest("#extraList").val();
+      console.log(miid);
+      $.post(URL,{'miid':miid, 'price':price, 'extras':extras, 'exclude':exclude},function(resp) { 
                 var name = resp.name;
                 var price = resp.price;
-                $("#[miid=" + resp.miid +"]").find(".name").text(name);
+               
             },
             'json');
       
     });
+    
+   $("#menuItems").on(
+    "click", "input[type=submit]#addCust", 
+    function(event) {
+      event.preventDefault();
+      var miid = $(this).attr("miid");
+      console.log(miid);
+      $.post(URL,{'miid':miid},function(resp) { 
+                
+            },
+            'json');
+      
+    });
+    
+    // $("#menuItems").each("")
 
 /* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
-function openNav(miid) {
-  $("#ingredList").empty();
+function openNav(item,miid) {
+  exclude = ["Null"];
+  extras = ["Null"];
+  $(item).closest("tr").find(".checkboxBigger").attr("checked",true);
   document.getElementById("custombar").style.width = "400px";
   document.getElementById("main").style.marginLeft = "400px";
-  // var miid = $(this).closest("tr").find("input[type=checkbox]").val();
    var itemName = $("tr[value=" + miid +"]").find(".name").text();
+   console.log(itemName);
+   var itemPrice = $("tr[value=" + miid +"]").find(".price").text();
+   console.log(itemPrice);
    $.post(URLm,{'miid':miid},function(resp) { 
                 var ingred = resp.ingred;
                 var extra = resp.extra;
@@ -168,23 +200,35 @@ function openNav(miid) {
                 console.log(extra);
                  $("#custombar").find('h1').text(itemName);
                  $('#ingredList').val(miid);
+                 
+                 console.log(exclude);
                 for (var i in ingred){
-                  $('#ingredList').append('<tr> <td>'+ingred[i]['name']+'</td> <td> <input type="checkbox" class = "calc" id="include" kind="'+ingred[i]['kind']+
-                  '" value="'+ingred[i]['price']+'" iid="'+ingred[i]['iid']+'" checked>'+   ingred[i]['price']+'</input> </td> </tr>');
+                  
+                  $('#ingredList').append('<tr> <td>'+ingred[i]['name']+'</td> <td> <input name="'+ingred[i]['name']+'" type="checkbox" class = "calc" id="include" kind="'+ingred[i]['kind']+
+                  '" value="'+ingred[i]['price']+'" iid="'+ingred[i]['iid']+'" checked> $'+ ingred[i]['price']+'</input> </td> </tr>');
+                   if (ingred[i]['quantity']<=0){
+                     $("input[iid="+ingred[i]['iid']+"]").attr("disabled", true).removeAttr("checked");
+                     itemPrice-=$("input[iid="+ingred[i]['iid']+"]").val();
+                     $("tr[value=" + miid +"]").find(".price").text(itemPrice);
+                     exclude.push(ingred[i]['name']);
+                   }
                  }
-                 $('#extraList').val(miid)
+                 $('table#extraList').val(miid);
+                 $('table#extraList').find("input[type=checkbox]").attr("checked",false);
+                 $('input#sum').val(itemPrice);
             
             },
             'json');
     
 }
 
+
 function calcTotal(){
   var total = 0;
   $(".calc:checked").each(function(){
         total+=parseFloat($(this).val(),10);
     });
-    $("input[name=sum]").val(total)
+    $("input#sum").val(total)
 }
   
     $("#extraList").on("click", "input[type=checkbox]", function(event){
@@ -215,12 +259,18 @@ function calcPrice(){
       console.log($(this)[0].checked);
       var nprice = oprice;
       if ($(this)[0].checked === true) {
+        var index = exclude.indexOf($(this)[0].name)
+        // if (index > -1) {
+          exclude.splice(index, 1);
+        // }
         nprice+=iprice;
       }else{
+        exclude.push($(this)[0].name);
         nprice-=iprice;
       }
+      console.log(exclude)
       $("tr[value=" + miid +"]").find(".price").text(nprice);
-      $("input[name=sum]").val(nprice)
+      $("input#sum").val(nprice)
    });
    
   $("#extraList").on(
@@ -230,7 +280,7 @@ function calcPrice(){
       console.log(name);
       var iprice = parseFloat($(this).val());
       var miid = $(this).closest("#extraList").val();
-      // console.log(miid);
+      console.log(miid);
       console.log(iprice);
       var oprice = parseFloat($("tr[value=" + miid +"]").find(".price").text());
       
@@ -243,13 +293,17 @@ function calcPrice(){
         nprice-=iprice;
       }
       $("tr[value=" + miid +"]").find(".price").text(nprice);
-      $("input[name=sum]").val(nprice)
-      $.post(URL,{'miid':miid, 'name':name, 'price':nprice, 'extra':true},function(resp) {
-        var iname = resp.iname;
-        var aname = resp.aname;
-        $('#notice').empty();
-        $('#notice').append('<p> Added '+iname+' with '+aname+' to cart!');
-      });
+      $("input#sum").val(nprice);
+      extras.push(name);
+      console.log(extras);
+      
+      // $.post(URL,{'miid':miid, 'name':name, 'price':nprice, 'extra':true},function(resp) {
+      //   var iname = resp.iname;
+      //   var aname = resp.aname;
+      //   $('#notice').empty();
+      //   $('#notice').append('<p> Added '+iname+' with '+aname+' to cart!');
+      // });
+      
   });
 
 
