@@ -86,6 +86,16 @@ th{
         </tr>
         {% for item in items %}
           {% if item.kind == "sandwich" %}
+            <!-- Customization unavailable for open-faced sandwiches right now-->
+            {% if item.name == "The Consensu-el"%}
+            <tr class="all sandwich" value={{item.miid}}>
+              <td class="name">{{item.name}}</td>
+              <td class="price">$ {{item.price}}</td>
+              <td>
+                <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
+              </td>
+            </tr>
+            {% else %}
             <tr class="all sandwich" value={{item.miid}}>
               <td class="name">{{item.name}}</td>
               <td class="price">$ {{item.price}}</td>
@@ -96,7 +106,7 @@ th{
                 <button class ="customize" type="button" id="customMenu" onclick="openNav(this.value)" value={{item.miid}}> Customize
                 </button></td>
             </tr>
-
+            {% endif %}
           {% elif item.kind == "drink" %}
             <tr class="all drink" miid={{item.miid}}>
             <td class="name">{{item.name}}</td>
@@ -172,7 +182,6 @@ function openNav(miid) {
                   $('#ingredList').append('<tr> <td>'+ingred[i]['name']+'</td> <td> <input type="checkbox" class = "calc" id="include" kind="'+ingred[i]['kind']+
                   '" value="'+ingred[i]['price']+'" iid="'+ingred[i]['iid']+'" checked>'+   ingred[i]['price']+'</input> </td> </tr>');
                  }
-
                  $('#extraList').val(miid)
             },
             'json');
