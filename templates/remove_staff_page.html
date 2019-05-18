@@ -15,11 +15,11 @@
     <p><input type="button" id="remove-btn" value="Remove"></p>
 </form>
 
-<ul id="staff-members">
+<div id="staff-members">
     {% for staff in staffMembers %}
-        <li id={{staff['username']}}>{{staff['username']}}</li>
+        <div id={{staff['username']}}>{{staff['username']}}</div>
     {% endfor %}
-</ul>
+</div>
 
 <script>
 
@@ -51,7 +51,6 @@
         var op_id = id + "_op";
         document.getElementById(id).remove();
         document.getElementById(op_id).remove();
-        // $(id+"_op").remove();
         alert("User " + id + " was successfully removed from the staff directory");
     }
     
