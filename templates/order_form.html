@@ -11,26 +11,28 @@
   display: inline-block;
   font-size: 16px;
 }
+
 .checkboxBigger {
     width: 20px;
     height: 20px;
-    background: #ddd;
-
     border-radius: 100%;
     position: relative;
 }
 
-.bold { 
-    font-weight: bold; 
-}
-
 table, th, td {
-  border: 1px dashed black;
+  /*border: 1px dashed black;*/
   border-collapse: collapse;
 }
 th, td, tr {
   padding: 5px;
-  text-align: left;    
+  text-align: center;    
+}
+th{
+  background-color:pink;
+  color:white;
+}
+.center-align{
+  text-align:center;
 }
 </style>
 {% extends "index.html" %}
@@ -63,30 +65,40 @@ th, td, tr {
   <div id="main">
   <h1>El Table Menu Items</h1>
   <p><strong>Please Select 1 or More Menu Items to Add to Order</strong></p>
+  
+  <div id="myBtnContainer">
+  <button id="all-btn" class="btn active" onclick="filterSelection('all')"> Show all</button>
+  <button id="sandwich-btn" class="btn" onclick="filterSelection('sandwich')"> Sandwiches</button>
+  <button id="drink-btn" class="btn" onclick="filterSelection('drink')"> Drinks</button>
+  <button id="candy-btn" class="btn" onclick="filterSelection('candy')"> Candies</button>
+  <button id="snack-btn" class="btn" onclick="filterSelection('snack')"> Snacks</button>
+</div>
   <div class="main">
     <div class="container" id="menuItems">
-      <form action="{{url_for('cart')}}" method="GET"> 
+      <form action="{{url_for('cart')}}" method="GET">
+      <div class="container">
       <table id="menuItems">
         <tr>
-          <th>Name</th>
-          <th>Price</th>
-          <th>Add to Cart</th>
+          <th class="center-align">Name</th>
+          <th class="center-align">Price</th>
+          <th class="center-align">Add to Cart</th>
+          <th> </th>
         </tr>
         {% for item in items %}
           {% if item.kind == "sandwich" %}
-            <tr value={{item.miid}}>
-            <td id="b" class="name">{{item.name}}</td>
-            <td id="b2" class="price">{{item.price}}</td>
-            <td>
-              <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
-            </td>
-            <td>
-              <button class ="customize" type="button" id="customMenu" onclick="openNav(this.value)" value={{item.miid}}> Customize
-              </button></td>
+            <tr class="all sandwich" value={{item.miid}}>
+              <td class="name">{{item.name}}</td>
+              <td class="price">$ {{item.price}}</td>
+              <td>
+                <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
+              </td>
+              <td>
+                <button class ="customize" type="button" id="customMenu" onclick="openNav(this.value)" value={{item.miid}}> Customize
+                </button></td>
             </tr>
 
           {% elif item.kind == "drink" %}
-            <tr miid={{item.miid}}>
+            <tr class="all drink" miid={{item.miid}}>
             <td class="name">{{item.name}}</td>
             <td class="price">$ {{item.price}}</td>
             <td>
@@ -94,7 +106,7 @@ th, td, tr {
             </td>  
             </tr>
           {% elif item.kind == "candy" %}
-            <tr miid={{item.miid}}>
+            <tr class="all candy" miid={{item.miid}}>
             <td class="name">{{item.name}}</td>
             <td class="price">$ {{item.price}}</td>
             <td>
@@ -102,9 +114,9 @@ th, td, tr {
             </td>
             </tr>
           {% elif item.kind == "snack" %}
-            <tr miid={{item.miid}}>
+            <tr class="all snack" miid={{item.miid}}>
             <td class="name">{{item.name}}</td>
-            <td class="price">{{item.price}}</td>
+            <td class="price">$ {{item.price}}</td>
             <td><form action="{{url_for('cart')}}" method="GET">
               <input class ="checkboxBigger"  type="checkbox" id="cb" value="{{item.miid}}"></input>
             </td>
@@ -112,6 +124,7 @@ th, td, tr {
           {% endif %}
         {% endfor %}
         </table>
+        </div>
        <br>
       Total Price: <input type="text" name="subtotal" value="0" />
       <br><button type="submit">Checkout!</button>
@@ -247,5 +260,21 @@ function closeNav() {
   document.getElementById("custombar").style.width = "0";
   document.getElementById("main").style.marginLeft = "0";
 }
-  </script>
-  {% endblock %}
+
+function filterSelection(className){
+  var allClasses = ["sandwich", "drink", "candy", "snack", "all"];
+  var btnIDs = ["sandwich-btn", "drink-btn", "candy-btn", "snack-btn", "all-btn"];
+
+  for(var i=0;i<allClasses.length;i++){
+    var currClass = allClasses[i]
+    var currBtn = btnIDs[i]
+    if (className != currClass){
+      $("."+currClass).hide();
+      $("#"+currBtn).attr("class", "btn");
+    }
+  }
+  $("."+className).show();
+  $("#"+className+"-btn").attr("class", "btn active");
+}
+</script>
+{% endblock %}
