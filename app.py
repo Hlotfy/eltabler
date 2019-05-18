@@ -25,7 +25,7 @@ def set_staff():
     hashed = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
     functions.setDefaultPwd(conn,hashed)
     staff = functions.allStaff(conn)
-    print staff
+    #print staff
     return staff
     
 
@@ -65,14 +65,16 @@ def add_staff():
 @app.route('/remove_staff/',  methods = ['POST','GET'])
 def remove_staff():
     conn = functions.getConn('tabtracker')
-    users = functions.getAllUsers(conn)
-    staffMembers = functions.getAllStaff(conn)
- 
-    staffId = request.form.get('username')
-    password = request.form.get('password')
-    is_removed = functions.removeStaffMember(conn, staffId)
-    
-    return render_template('remove_staff_page.html', users=users, staffMembers = staffMembers)             
+    if request.method == 'GET':
+        staffMembers = functions.getAllStaff(conn)
+        return render_template('remove_staff_page.html',staffMembers = staffMembers)
+    elif request.method == 'POST':
+        print "REQUEST:", request
+        staffId = request.form.get('username')
+        print staffId
+        is_removed = functions.removeStaffMember(conn, staffId)
+        print "isRemoved:",is_removed
+        return jsonify({'username':staffId})             
 
 @app.route('/staff_login/',  methods = ['POST'])
 # route which processes the staff login and adds the username to the session

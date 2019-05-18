@@ -62,7 +62,7 @@ def removeStaffMember(conn,username):
     conn.commit()
     # curs.execute('DELETE FROM staff WHERE username = %s',
     #                  [username])
-    return curs.fetchone()
+    return row
     
 # gets every user's username and name
 def getAllUsers(conn):
