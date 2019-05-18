@@ -1,0 +1,47 @@
+{% extends "index.html" %}
+
+{% block content %}
+<h1>Remove Staff Members Below</h1>
+<div class='main'>
+
+<ul id="users">
+{% for staff in staffMembers %}
+        <p>
+            <td><button class="remove-btn" type="button" name="button">
+                <img src="{{ url_for('static', filename='delete-icn.svg') }}" alt="" />
+              </button></td>
+            <td>{{staff.username}}</td>
+        </p>
+{% endfor %}
+</ul>
+</div>
+
+<script>
+
+ /* global $ */
+ /* global functions */
+     
+var URL = "{{url_for('remove_staff')}}";
+      
+  /*button to remove an employee from list of employees */ 
+    $(".remove-btn").on("click", function(event){
+      event.preventDefault();
+      var miid = $(this).closest(".quantity").find("#miid").val();
+      console.log(miid);
+     
+      if(confirm("Are you sure you wish to remove this employee?")){
+         $(this).parent().remove();  
+         alert("The following user was successfully removed from the staff directory: " );
+       }
+    else{
+        alert("The employee was not removed " );
+    }
+    //   functions.removeStaffMember(conn, username)
+      //changeQuant(miid,0);
+    });
+    
+</script>
+
+{% endblock %}
+
+

@@ -52,11 +52,28 @@ def addStaffMember(conn,username,hashed):
     curs.execute('SELECT username FROM staff WHERE username = %s',
                      [username])
     return curs.fetchone()
+
+#remove staff member from database
+def removeStaffMember(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('DELETE FROM staff WHERE username = %s',
+                     [username])
+    row = curs.fetchone()
+    conn.commit()
+    # curs.execute('DELETE FROM staff WHERE username = %s',
+    #                  [username])
+    return curs.fetchone()
     
 # gets every user's username and name
 def getAllUsers(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select username,name from user;')
+    return curs.fetchall()
+
+# gets every staff's username and name
+def getAllStaff(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select username,hashed from staff;')
     return curs.fetchall()
     
 # get all menu items of a certain category
