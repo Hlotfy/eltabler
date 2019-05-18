@@ -172,10 +172,15 @@ var extras = ["Null"];
   $("#extraList").on(
     "click", "input[type=submit]",
     function(event) {
-      
+      var name = $(this).closest("tr").find("td.name").text()
       var price = $(this).closest("tr").find("#sum").val()[0];
+      if ($(this)[0].checked===true){
+        
+        extras.push($(this).closest("tr").find("td.name").text());
+      }
       // var price = $(this).closest("tr").find(".price").text();
       console.log(price);
+      console.log(name);
       var miid = $(this).closest("#extraList").val();
       console.log(miid);
       $.post(URL,{'miid':miid, 'price':price, 'extras':extras, 'exclude':exclude},function(resp) { 
@@ -204,6 +209,7 @@ var extras = ["Null"];
 
 /* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
 function openNav(item,miid) {
+  $("#ingredList").empty();
   exclude = ["Null"];
   extras = ["Null"];
   $(item).closest("tr").find(".checkboxBigger").attr("checked",true);
@@ -337,11 +343,11 @@ function closeNav() {
 function filterSelection(className){
   var allClasses = ["sandwich", "drink", "candy", "snack", "all"];
   var btnIDs = ["sandwich-btn", "drink-btn", "candy-btn", "snack-btn", "all-btn"];
-
+  console.log(className);
   for(var i=0;i<allClasses.length;i++){
     var currClass = allClasses[i]
     var currBtn = btnIDs[i]
-    if (className != currClass){
+    if (currClass != className){
       $("."+currClass).hide();
       $("#"+currBtn).attr("class", "btn");
     }

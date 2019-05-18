@@ -39,9 +39,9 @@
         {% if (session['currentOrders'][username][item]['extras']|length) > 1 %}
          <td>Custom</td>  
                 
-                    {% for i in range(0,(session['currentOrders'][username][item]['extras']|length)) %}
+                    {% for i in range(1,(session['currentOrders'][username][item]['extras']|length)) %}
                     <tr><td></td><td></td>
-                    <td>{{session['currentOrders'][username][item]['extras'][i]}}</td>
+                    <td> Add {{session['currentOrders'][username][item]['extras'][i]}}</td>
                     </tr>
                     {% endfor %}
                 
@@ -49,12 +49,12 @@
         {% endif %}
         {% endif %}
         
-        {% if session['currentOrders'][username][item]['include'] != None %}
-        {% if (session['currentOrders'][username][item]['include']|length) > 0 %}
+        {% if session['currentOrders'][username][item]['exclude'] != None %}
+        {% if (session['currentOrders'][username][item]['exclude']|length) > 0 %}
         
-                    {% for i in range(0,(session['currentOrders'][username][item]['include']|length)) %}
+                    {% for i in range(1,(session['currentOrders'][username][item]['exclude']|length)) %}
                     <tr><td></td><td></td>
-                    <td><b>No {{session['currentOrders'][username][item]['include'][i]}}</b></td>
+                    <td><b>No {{session['currentOrders'][username][item]['exclude'][i]}}</b></td>
                     </tr>
                     {% endfor %}
         
