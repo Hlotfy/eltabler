@@ -64,6 +64,8 @@ def add_staff():
 
 @app.route('/remove_staff/',  methods = ['POST','GET'])
 def remove_staff():
+    if not session.get('staffId'):
+        return redirect(url_for('index'))
     conn = functions.getConn('tabtracker')
     if request.method == 'GET':
         staffMembers = functions.getAllStaff(conn)
@@ -309,6 +311,8 @@ def payment(username):
 
 @app.route('/inventory/', methods = ['GET','POST'])
 def inventory():
+    if not session.get('staffId'):
+        return redirect(url_for('index'))
     conn = functions.getConn('tabtracker')
     categories = functions.getIngredientKinds(conn)
     ingredients = functions.getAllIngredients(conn)
