@@ -1,9 +1,47 @@
 <script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
 <!DOCTYPE html>
+<style type="text/css">
+table {
+  /*background-color: pink;*/
+  color: black;
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 16px;
+}
+.labels{
+   font-size: 20px;
+   font-weight:none;
+}
+th, td {
+  padding: 10px;
+}
+.center-align {
+  text-align: center;
+}
+.login-btn{
+  background-color: white;
+  border: solid pink;
+  color: pink;
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.login-input {
+  border: none;
+  border-bottom: 2px solid pink;
+}
+input::placeholder{
+  font-style:italic;
+}
+</style>
 <html>
   {% block head %}
     <head>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
+    <title>Tab Tracker</title>
     </head>
   {% endblock %}
     <body>
@@ -11,14 +49,15 @@
     {% if session['staffId'] %}
     <div class="navbar">
         
-          <!-- <li id="lmbar"><a href="">Inventory</a></li> -->
           <label>
           <li id="lmbar"><a href="{{url_for('current_orders')}}">Current Orders</a></li>
           <li id="lmbar"><a href="{{url_for('order', username=session['username'])}}">Menu</a></li>
           <li id="lmbar"><a href="{{url_for('tabs')}}">User Tabs</a></li>
           <li id="lmbar"><a href="{{url_for('add_staff')}}">Add Staff Member</a></li>
-          </label>
           
+          <li id="lmbar"><a href="{{url_for('inventory')}}">Inventory</a></li>
+          </label>
+          <!-- <li id="lmbar"><a href="{{url_for('remove_staff')}}">Remove Staff Member</a></li> -->
           {% if session['username'] %}
           
           <div class="dropdown">
@@ -62,17 +101,28 @@
         <div id="content", align="center">
         {% block content %}
         <br><br>
-        <h2>Login Form</h2>
+        
 
         <form action="{{url_for('staff_login')}}" method="POST">
           <div class="container">
-            <label for="staffId">Username</label>
-            <input name="staffId" id="staffId" type="text" placeholder="Enter Username" required>
-        
-            <label for="pwd"><b>Password</b></label>
-            <input type="password" placeholder="Enter Password" name="pwd" id="pwd" required>
-                
-            <button type="submit">Login</button>  
+            <table>
+              <tr>
+                <th class="center-align"><h2>Login Form</h2></th>
+              </tr>
+              <tr>
+                <td>
+                  <label class="labels" for="staffId">Username</label>
+                  <input class="login-input" name="staffId" id="staffId" type="text" placeholder="Enter Username" required>
+                </td>
+              </tr>
+              <tr>
+                <td><label class="labels" for="pwd">Password</label>
+                <input class="login-input" type="password" placeholder="Enter Password" name="pwd" id="pwd" required></td>
+              </tr>
+              <tr>
+                <td class=center-align><button class="login-btn" type="submit">Login</button> </td>
+              </tr>
+            </table>
           </div>
         </form>
         {% endblock %}

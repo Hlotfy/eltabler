@@ -231,8 +231,9 @@ def cart():
             return jsonify({'miid':miid,'quantity':cq})
         item = functions.getMenuItem(conn,miid)
         if miid in cart:
+            if price:
+                cart[miid]['price'] = price
             cart[miid]['quantity'] = int(cart[miid]['quantity'])
-            cart[miid]['price'] = price
             cart[miid]['quantity'] += 1
         else:
             print "adding item to cart!!"

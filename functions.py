@@ -52,11 +52,28 @@ def addStaffMember(conn,username,hashed):
     curs.execute('SELECT username FROM staff WHERE username = %s',
                      [username])
     return curs.fetchone()
+
+#remove staff member from database
+def removeStaffMember(conn,username):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('DELETE FROM staff WHERE username = %s',
+                     [username])
+    row = curs.fetchone()
+    conn.commit()
+    # curs.execute('DELETE FROM staff WHERE username = %s',
+    #                  [username])
+    return row
     
 # gets every user's username and name
 def getAllUsers(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select username,name from user;')
+    return curs.fetchall()
+
+# gets every staff's username and name
+def getAllStaff(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select username,hashed from staff;')
     return curs.fetchall()
     
 # get all menu items of a certain category
@@ -78,7 +95,7 @@ def getMenuItem(conn,miid):
     
 def getAllIngredients(conn):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select * from ingredient')
+    curs.execute('select * from ingredient order by kind')
     return curs.fetchall()
 
 # Gets the ingredients of a given menu item
@@ -86,6 +103,18 @@ def getIngredients(conn, miid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select * from ingredient inner join recipe using (iid) where miid = %s', (miid,))
     return curs.fetchall()
+    
+def getIngredientKinds(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select kind from ingredient where kind != "base" group by kind')
+    return curs.fetchall()
+    
+def updateQuantity(conn,ingred_id,quantity):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('update ingredient set quantity = (select * from (select quantity + %s from ingredient where iid=%s) as t1) where iid=%s',(quantity,ingred_id,ingred_id,))
+    curs.execute('select * from ingredient where iid = %s',(ingred_id,))
+    conn.commit()
+    return curs.fetchone()
 
 # Updates the payments table, and the user's current balance in the user table
 def makePayment(conn,username,method,amount,dt):
