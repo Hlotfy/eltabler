@@ -21,7 +21,7 @@
         <input type="text" id="quantity" name="quantity">
     </p>
     <p><input type="button" id="submit-btn" value="Submit"></p>
-    </form>
+</form>
 
 <div id="ingredients-list">
     <h2>Current quantities</h2>
@@ -70,10 +70,6 @@
             $("<p style = color:red>")
                 .text("New " + ingred.name + " quantity: " + ingred.quantity)
                 .prependTo("#newInventoryInfo");
-            /*$("#"+ingred.ingred_id)
-                .empty();*/
-            /*$("#"+ingred.ingred_id)
-                .html("<tr> <td style = color:red;>" + ingred.name + "</td><td style=color:red;>" + ingred.quantity + "</td><tr>");*/
             $("td#" + ingred['ingred_id'] +"_quantity")
                 .text(ingred['quantity']);
             $("tr#"+ingred['ingred_id'])

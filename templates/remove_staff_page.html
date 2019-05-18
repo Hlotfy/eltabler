@@ -2,43 +2,58 @@
 
 {% block content %}
 <h1>Remove Staff Members Below</h1>
-<div class='main'>
 
-<ul id="users">
-{% for staff in staffMembers %}
-        <p>
-            <td><button class="remove-btn" type="button" name="button">
-                <img src="{{ url_for('static', filename='delete-icn.svg') }}" alt="" />
-              </button></td>
-            <td>{{staff.username}}</td>
+<form method="POST" action="">
+        <p><label for=username>Username</label>
+            <select id="username">
+                <option value="" disabled selected>Staff member</option>
+                {% for staff in staffMembers %}
+                    <option id="{{staff['username']}}_op" value={{staff['username']}}>{{staff['username']}}</option>
+                {% endfor %}
+            </select>
         </p>
-{% endfor %}
+    <p><input type="button" id="remove-btn" value="Remove"></p>
+</form>
+
+<ul id="staff-members">
+    {% for staff in staffMembers %}
+        <li id={{staff['username']}}>{{staff['username']}}</li>
+    {% endfor %}
 </ul>
-</div>
 
 <script>
 
  /* global $ */
  /* global functions */
      
-var URL = "{{url_for('remove_staff')}}";
-      
-  /*button to remove an employee from list of employees */ 
-    $(".remove-btn").on("click", function(event){
-      event.preventDefault();
-      var miid = $(this).closest(".quantity").find("#miid").val();
-      console.log(miid);
-     
-      if(confirm("Are you sure you wish to remove this employee?")){
-         $(this).parent().remove();  
-         alert("The following user was successfully removed from the staff directory: " );
-       }
-    else{
-        alert("The employee was not removed " );
+    var URL = "{{url_for('remove_staff')}}";
+          
+      /*button to remove an employee from list of employees */ 
+        $("#remove-btn").on("click", function(event){
+            event.preventDefault();  // prevent default form submission
+            if(confirm("Are you sure you wish to remove this employee?")){
+                var staffId = $("#username").val();
+                console.log(staffId);
+                sendUpdate(staffId);
+            }else{
+                alert("The employee was not removed.");
+            }
+        });
+    
+    function sendUpdate(staffId){
+        console.log("Deleting " + staffId + " from the list of staff members");
+        $.post(URL,{'username':staffId},updatePage);
     }
-    //   functions.removeStaffMember(conn, username)
-      //changeQuant(miid,0);
-    });
+    
+    function updatePage(obj){
+        var id = obj.username;
+        console.log(id);
+        var op_id = id + "_op";
+        document.getElementById(id).remove();
+        document.getElementById(op_id).remove();
+        // $(id+"_op").remove();
+        alert("User " + id + " was successfully removed from the staff directory");
+    }
     
 </script>
 
