@@ -53,9 +53,19 @@ input::placeholder{
           <li id="lmbar"><a href="{{url_for('current_orders')}}">Current Orders</a></li>
           <li id="lmbar"><a href="{{url_for('order', username=session['username'])}}">Menu</a></li>
           <li id="lmbar"><a href="{{url_for('tabs')}}">User Tabs</a></li>
-          <li id="lmbar"><a href="{{url_for('add_staff')}}">Add Staff Member</a></li>
-          <li id="lmbar"><a href="{{url_for('remove_staff')}}">Remove Staff Member</a></li> 
           <li id="lmbar"><a href="{{url_for('inventory')}}">Inventory</a></li>
+           <div class="dropdown">
+            <label>
+              <button name="dropbtn" class="dropbtn" onclick="drop_staff_menu()">Staff Tools</a>
+                <i class="fa fa-caret-down"></i>
+              </button>
+            </label>
+              <div class="dropdown-content" id="staff_dd">
+                <label><a href="{{url_for('add_staff')}}">Add Staff Member</a></label>
+                <label><a href="{{url_for('remove_staff')}}">Remove Staff Member</a></label>
+              </div>
+           </div>
+         
           </label>
           
           {% if session['username'] %}
@@ -130,10 +140,18 @@ input::placeholder{
         </div>
         
   <script>
-    /* When the user clicks on the button, 
-    toggle between hiding and showing the dropdown content */
+    /* When the user clicks on the button, toggle between hiding 
+       and showing the dropdown content for user account info 
+       (Payment, Recent Orders, Cart, Logout)*/
     function drop_menu() {
       document.getElementById("user_dd").classList.toggle("show");
+    }
+    
+    /* When the user clicks on the button, 
+    toggle between hiding and showing the dropdown content 
+     of the various staff tools (Add staff, Remove Staff)*/
+    function drop_staff_menu() {
+      document.getElementById("staff_dd").classList.toggle("show");
     }
     
     // Close the dropdown if the user clicks outside of it
@@ -142,6 +160,17 @@ input::placeholder{
       var user_dd = document.getElementById("user_dd");
         if (user_dd.classList.contains('show')) {
           user_dd.classList.remove('show');
+        }
+      }
+    }
+    
+        
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function(f) {
+      if (!f.target.matches('.dropbtn')) {
+      var staff_dd = document.getElementById("staff_dd");
+        if (staff_dd.classList.contains('show')) {
+          staff_dd.classList.remove('show');
         }
       }
     }

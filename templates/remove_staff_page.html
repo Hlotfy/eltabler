@@ -1,14 +1,51 @@
 {% extends "index.html" %}
 
 {% block content %}
+<style>
+/*remove staff page styling*/
+.staffNames-dropdown {
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  padding: 18px;
+  margin-left:1em;
+  margin-right:1em;
+  width: 30%;
+  border: 5px solid pink;
+  text-align: center;
+  outline: none;
+  font-size: 15px;
+  transition: 0.4s;
+}
+
+.staffUserNames {
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  padding: 18px;
+  margin-left:1em;
+  margin-right:1em;
+  width: 80%;
+  border: 5px solid pink;
+  text-align: center;
+  outline: none;
+  font-size: 20px;
+  transition: 0.4s;
+}
+
+.userName {
+  font-size: 20px;   
+}
+
+</style>
 <h1>Remove Staff Members Below</h1>
 
 <form method="POST" action="">
-        <p><label for=username>Username</label>
-            <select id="username">
-                <option value="" disabled selected>Staff member</option>
+        <p><label for=username class="userName">Username</label>
+            <select class="staffNames-dropdown" id="username">
+                <option class="staffNames-dropdown" value="" disabled selected>Staff member</option>
                 {% for staff in staffMembers %}
-                    <option id="{{staff['username']}}_op" value={{staff['username']}}>{{staff['username']}}</option>
+                    <option class="staffNames-dropdown" id="{{staff['username']}}_op" value={{staff['username']}}>{{staff['username']}}</option>
                 {% endfor %}
             </select>
         </p>
@@ -17,7 +54,7 @@
 
 <div id="staff-members">
     {% for staff in staffMembers %}
-        <div id={{staff['username']}}>{{staff['username']}}</div>
+        <div class="staffUserNames" id={{staff['username']}}>{{staff['username']}}</div>
     {% endfor %}
 </div>
 
@@ -28,17 +65,17 @@
      
     var URL = "{{url_for('remove_staff')}}";
           
-      /*button to remove an employee from list of employees */ 
-        $("#remove-btn").on("click", function(event){
-            event.preventDefault();  // prevent default form submission
-            if(confirm("Are you sure you wish to remove this employee?")){
-                var staffId = $("#username").val();
-                console.log(staffId);
-                sendUpdate(staffId);
-            }else{
-                alert("The employee was not removed.");
-            }
-        });
+    /*button to remove an employee from list of employees */ 
+    $("#remove-btn").on("click", function(event){
+        event.preventDefault();  // prevent default form submission
+        var staffId = $("#username").val();
+        console.log(staffId);
+        if(confirm("Are you sure you wish to remove this employee?")){
+            sendUpdate(staffId);
+        }else{
+            alert("The employee " + staffId + " was not removed.");
+        }
+    });
     
     function sendUpdate(staffId){
         console.log("Deleting " + staffId + " from the list of staff members");

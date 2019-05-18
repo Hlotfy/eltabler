@@ -1,25 +1,52 @@
 {% extends "index.html" %}
 
 {% block content %}
+<style>
+/*styling for add new staff member page*/    
+.newStaff {
+    font-size: 20px;   
+}
+.newStaff-input {
+  background-color: white;
+  color: black;
+  cursor: pointer;
+  padding: 18px;
+  margin-left:1em;
+  margin-right:1em;
+  width: 30%;
+  border: 5px solid pink;
+  text-align: center;
+  outline: none;
+  font-size: 20px;
+  transition: 0.4s;
+}    
+
+.addStaff-button {
+    /*position: absolute;*/
+    font-size: 18px;
+    /*margin-left: 50px;*/
+}
+
+</style>
 <h1>Add New Staff Member Below</h1>
-<input id="changeform" type="button" value="Click Here to Change Staff Member Password">
+<input class="addStaff-button" id="changeform" type="button" value="Click Here to Change Staff Member Password">
 
 <div >
 <form id="joinform" style="display:block" method="POST">
     <h2>Join</h2>
-    <p><label><input type="text" name="username" required pattern="^\w+$"> Username</label></p>
-    <p><label><input type="password" name="password1" required> Password </label></p>
-    <p><label><input type="password" name="password2" required> Password again </label></p>
-    <p><button type="submit">Submit</button></p>
+    <p><label class="newStaff" ><input class="newStaff-input" type="text" name="username" required pattern="^\w+$"> Username</label></p>
+    <p><label class="newStaff"><input class="newStaff-input" type="password" name="password1" required> Password </label></p>
+    <p><label class="newStaff"><input class="newStaff-input" type="password" name="password2" required> Password again </label></p>
+    <p><button class="addStaff-button" type="submit">Submit</button></p>
 </form>
 </div>
 <div >
 <form id="changepwdform" style="display:none" method="POST">
     <h2>Change Staff Member Password</h2>
-    <p><label><input type="text" name="username" required pattern="^\w+$"> Staff Username</label></p>
-    <p><label><input type="password" name="password1" required> New Password </label></p>
-    <p><label><input type="password" name="password2" required> New Password again </label></p>
-    <p><button type="submit">Submit</button></p>
+    <p><label class="newStaff" ><input class="newStaff-input" type="text" name="username" required pattern="^\w+$"> Staff Username</label></p>
+    <p><label class="newStaff" ><input class="newStaff-input" type="password" name="password1" required> New Password </label></p>
+    <p><label class="newStaff" ><input class="newStaff-input" type="password" name="password2" required> New Password again </label></p>
+    <p><button class="addStaff-button" type="submit">Submit</button></p>
 </form>
 </div>
 
