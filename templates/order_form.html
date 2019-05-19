@@ -93,10 +93,11 @@ th{
   <div id="myBtnContainer">
     
   {% for category in kinds %}
-    {% if (category['kind'] != "pastry") and  (category['kind'] != "gluten-free") %}
+    {% if (category['kind'] != "pastry") and (category['kind'] != "gluten-free") and (category['kind'] != "soup") %}
     <button id="{{category['kind']}}" value="{{category['kind']}}" onclick="filterSelection(this.value)">{{category['kind']}}</button>
     {% endif %}
   {% endfor %}
+  <button onclick="filterSelection('all')">Show All</button>
   
   <!--<button id="sandwich-btn" class="btn" onclick="filterSelection('sandwich')"> Sandwiches</button>-->
   <!--<button id="drink-btn" class="btn" onclick="filterSelection('drink')"> Drinks</button>-->
@@ -375,7 +376,11 @@ function closeNav() {
 
 
 function filterSelection(className){
-  $("tr."+className).siblings("tr:not(."+className+"):not(.title)").toggle();
+  if (className==="all"){
+    $("tr").show();
+  }else{
+  $("tr."+className).show().siblings("tr:not(."+className+"):not(.title)").hide();
+  }
 }
 
 

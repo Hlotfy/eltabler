@@ -26,6 +26,7 @@
 {% for category in kinds %}
 <button onclick="toggleV(this.value, {{category}})" value="{{category['kind']}}">{{category['kind']}}</button>
 {% endfor %}
+<button onclick="showAll()">Show All</button>
 
 <div id="ingredients-list">
     <h2>Current quantities</h2>
@@ -93,9 +94,12 @@
         console.log(category);
         
         // console.log(categories);
-        $("table#"+category).siblings("table").toggle();
+        $("table#"+category).show().siblings("table").hide();
         
-        
+    }
+    
+    function showAll(){
+        $("table").show();
     }
     
 </script>
