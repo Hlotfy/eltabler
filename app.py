@@ -134,9 +134,10 @@ def order():
         extra = functions.getAllIngredients(conn)
         
         return jsonify({'ingred':ingred, 'extra':extra})
+    kinds = functions.getMenuItemKinds(conn)
     items = functions.getAllMenuItems(conn)
     ingreds = functions.getAllIngredients(conn)
-    return render_template('order_form.html', items=items, ingreds=ingreds)
+    return render_template('order_form.html', items=items, ingreds=ingreds, kinds=kinds)
 
 @app.route('/access_tab', methods = ['POST'])
 # route which processes access to the selected user's tab, adding the username to the session and creating a sesion id for the session
@@ -176,6 +177,7 @@ def recent_orders(username):
         if form:
             
             form = [{form.keys()[j]: form.values()[j][i] for j in range(len(form))} for i in range(len(form.values()[0]))]
+            print form
             functions.addOrder(conn,form,username)
             orders = functions.getRecentOrders(conn,username)
             items = functions.getOrderItems(conn,username)
@@ -256,7 +258,8 @@ def cart():
             if item['kind'] == "sandwich":
                 item['extras'] = form['extras[]']
                 item['exclude'] = form['exclude[]']
-                item['price'] = price
+                if price:
+                    item['price'] = price
                 item['quantity'] = int(item['quantity'])
                 print item
             cart[miid] = item

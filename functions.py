@@ -81,6 +81,11 @@ def getMenuItemByKind(conn,kind):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     curs.execute('select miid,name,price from menuItem where kind = %s;', (kind,))
     return curs.fetchall()
+    
+def getMenuItemKinds(conn):
+    curs = conn.cursor(MySQLdb.cursors.DictCursor)
+    curs.execute('select kind from menuItem group by kind')
+    return curs.fetchall()
 
 # Gets all menu items
 def getAllMenuItems(conn):
@@ -155,7 +160,7 @@ def addOrder(conn,form,username):
 def addOrderItems(conn,item,oid):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
     print item
-    curs.execute('insert into orderItem(oid,miid,quantity) values(%s,%s,%s)',(oid,item['miid'],item['quantity']))
+    curs.execute('insert into orderItem(oid,miid,price,quantity) values(%s,%s,%s,%s)',(oid,item['miid'],item['price'],item['quantity']))
     conn.commit()
     curs.execute('update ingredient set quantity=quantity-%s where iid in (select iid from recipe where miid=%s);',(item['quantity'],item['miid']))
     conn.commit()
@@ -165,7 +170,7 @@ def addOrderItems(conn,item,oid):
 # fetches a user's recent orders based on their username
 def getRecentOrders(conn, user):
     curs = conn.cursor(MySQLdb.cursors.DictCursor)
-    curs.execute('select orders.oid, orders.dt, sum(orderItem.quantity) as item_num, sum(menuItem.price * orderItem.quantity) as "total" from orders inner join orderItem on (orders.oid=orderItem.oid) inner join menuItem on (orderItem.miid=menuItem.miid) where orders.username=%s group by orders.oid order by orders.oid DESC',(user,))
+    curs.execute('select orders.oid, orders.dt, sum(orderItem.quantity) as item_num, sum((orderItem.price * orderItem.quantity)) as "total" from orders join orderItem using (oid) where orders.username=%s group by orders.oid order by orders.oid DESC',(user,))
     return curs.fetchall()
     
 # fetches order items associated with a user based on their username

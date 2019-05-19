@@ -13,7 +13,7 @@
         <select id="ingredient" name="ingredient">
             <option value="" disabled selected>Ingredient name</option>
             {% for item in ingredients if item['kind'] != 'base' %}
-                <option value={{item['iid']}}>{{item['name']}}</option>
+                <option value="{{item['iid']}}">{{item['name']}}</option>
             {% endfor %}
         </select>
     </p>
@@ -23,16 +23,21 @@
     <p><input type="button" id="submit-btn" value="Submit"></p>
 </form>
 
+{% for category in kinds %}
+<button onclick="toggleV(this.value, {{category}})" value="{{category['kind']}}">{{category['kind']}}</button>
+{% endfor %}
+
 <div id="ingredients-list">
     <h2>Current quantities</h2>
     {% for category in kinds %}
         <h3>{{category['kind']}}</h2>
-        <table id="{{category['kind']}}">
+        <table class="invent" id="{{category['kind']}}">
         {% for item in ingredients %}
             {% if item['kind'] == category['kind'] %}
-                <tr id={{item['iid']}}>
-                    <td>{{item['name']}}</td>
+                <tr id="{{item['iid']}}">
+                    <td id="name">{{item['name']}}</td>
                     <td id="{{item['iid']}}_quantity">{{item['quantity']}}</td>
+                    <td><input type="hidden" value="{{item['iid']}}"></input></td>
                 </tr>
             {% endif %}
         {% endfor %}
@@ -77,6 +82,21 @@
         }
     }
     
+    $("table.invent").on("click", "tr", 
+    function(){
+        var iid = $(this).find("input[type=hidden]").val();
+        console.log(iid);
+       $("#ingredient").find('option[value='+iid+']').attr("selected","selected");
+    });
+    
+    function toggleV(category){
+        console.log(category);
+        
+        // console.log(categories);
+        $("table#"+category).siblings("table").toggle();
+        
+        
+    }
     
 </script>
 

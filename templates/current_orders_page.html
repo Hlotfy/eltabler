@@ -35,9 +35,10 @@
         
         <td>{{session['currentOrders'][username][item]['name']}}</td>
         <td>{{session['currentOrders'][username][item]['quantity']}}</td>
+        <td>Custom</td> 
         {% if session['currentOrders'][username][item]['extras'] != None %}
         {% if (session['currentOrders'][username][item]['extras']|length) > 1 %}
-         <td>Custom</td>  
+          
                 
                     {% for i in range(1,(session['currentOrders'][username][item]['extras']|length)) %}
                     <tr><td></td><td></td>

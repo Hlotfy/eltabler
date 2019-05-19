@@ -101,6 +101,7 @@ create table orders (
 create table orderItem (
     oid int,
     miid int,
+    price double,
     quantity int,
     foreign key (oid) references orders (oid),
     foreign key (miid) references menuItem (miid),

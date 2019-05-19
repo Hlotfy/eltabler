@@ -35,7 +35,7 @@
               </button>
             
         </td>
-        <p><td> <input type="hidden" class ="price" value="{{session['cart'][item]['price']}}">$ {{session['cart'][item]['price']}}</td></p>
+        <p><td> <input type="hidden" name="price" id="price" class ="price" value="{{session['cart'][item]['price']}}">$ {{session['cart'][item]['price']}}</td></p>
         <p><td class="total">$ ({{session['cart'][item]['price']}} * {{session['cart'][item]['quantity']}})</td></p>
         </tr>
         </div>   
@@ -90,7 +90,7 @@
     /*button to decrease the quantity of an item in the shopping cart by 1 unit.
       If quantity reaches 1, remains at 1 (1 is lower bound). */ 
      $(".minus-btn").on("click", function(event){
-      // $(this).closest(".quantity").remove();
+      
         var miid = $(this).closest(".quantity").find("#miid").val();
         console.log(miid);
         
@@ -102,9 +102,7 @@
         }
        
         $(this).closest(".quantity").find("input[name='quantity']").val(quant);
-        // if(quant===0){
-        //   $(this).closest(".quantity").remove();
-        // }
+        
         changeQuant(miid,quant);
      });
      

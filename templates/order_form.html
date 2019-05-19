@@ -19,6 +19,20 @@
     position: relative;
 }
 
+#notice {
+    font-weight:bold;
+    display: block;
+    opacity: 0.8;
+    
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin-top: 50px;
+    text-align:center;
+
+}
+
 table, th, td {
   /*border: 1px dashed black;*/
   border-collapse: collapse;
@@ -38,9 +52,7 @@ th{
 {% extends "index.html" %}
 
   {% block content %}
-  <div id="notice">
-    
-  </div>
+ 
   <div id="custombar" class="sidenav">
                   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
                   <h1></h1>
@@ -57,11 +69,15 @@ th{
                     {% for ingred in ingreds %}
                       <tr>
                         {% if ingred.quantity <= 0 %}
+                        
                         <td class="name"> <b>OUT OF STOCK</b> <s>{{ingred.name}}</s></td> 
                         <td>  <input id="ex" class ="calc" type="checkbox" value="{{ingred.price}}" disabled><s>${{ingred.price}}</s></input> </td> 
+                        <td><input type="hidden" id="quantity" value="{{ingred.quantity}}"></input></td>
                         {% else %}
-                         <td class="name">{{ingred.name}}</td>
+                        
+                        <td class="name">{{ingred.name}}</td>
                         <td> <input class ="calc" type="checkbox" value="{{ingred.price}}">${{ingred.price}}</input> </td> 
+                        <td><input type="hidden" id="quantity" value="{{ingred.quantity}}"></input></td>
                         {% endif %}
                       </tr>
                     {% endfor %}  
@@ -75,37 +91,44 @@ th{
   <p><strong>Please Select 1 or More Menu Items to Add to Order</strong></p>
   
   <div id="myBtnContainer">
-  <button id="all-btn" class="btn active" onclick="filterSelection('all')"> Show all</button>
-  <button id="sandwich-btn" class="btn" onclick="filterSelection('sandwich')"> Sandwiches</button>
-  <button id="drink-btn" class="btn" onclick="filterSelection('drink')"> Drinks</button>
-  <button id="candy-btn" class="btn" onclick="filterSelection('candy')"> Candies</button>
-  <button id="snack-btn" class="btn" onclick="filterSelection('snack')"> Snacks</button>
+    
+  {% for category in kinds %}
+    {% if (category['kind'] != "pastry") and  (category['kind'] != "gluten-free") %}
+    <button id="{{category['kind']}}" value="{{category['kind']}}" onclick="filterSelection(this.value)">{{category['kind']}}</button>
+    {% endif %}
+  {% endfor %}
+  
+  <!--<button id="sandwich-btn" class="btn" onclick="filterSelection('sandwich')"> Sandwiches</button>-->
+  <!--<button id="drink-btn" class="btn" onclick="filterSelection('drink')"> Drinks</button>-->
+  <!--<button id="candy-btn" class="btn" onclick="filterSelection('candy')"> Candies</button>-->
+  <!--<button id="snack-btn" class="btn" onclick="filterSelection('snack')"> Snacks</button>-->
 </div>
   <div class="main">
     <div class="container" id="menuItems">
       <form action="{{url_for('cart')}}" method="GET">
       <div class="container">
       <table id="menuItems">
-        <tr>
+        <tr class="title">
           <th class="center-align">Name</th>
           <th class="center-align">Price</th>
           <th class="center-align">Add to Cart</th>
-          <th> </th>
+           <div id="notice"></div>
+          <th>Total Price: <input type="text" name="subtotal" value="0" /> </th>
         </tr>
         {% for item in items %}
           {% if item.kind == "sandwich" %}
             
             <!-- Customization unavailable for open-faced sandwiches right now-->
             {% if item.name == "The Consensu-el"%}
-            <tr class="all sandwich" value={{item.miid}}>
+            <tr class="{{item['kind']}}" value={{item.miid}}>
               <td class="name">{{item.name}}</td>
-              <td class="price">$ {{item.price}}</td>
+              <td class="price">{{item.price}}</td>
               <td>
                 <input class ="checkboxBigger"  type="checkbox" id="cb" value={{item.miid}}></input>
               </td>
             </tr>
             {% else %}
-            <tr value="{{item.miid}}">
+            <tr class="{{item['kind']}}" value="{{item.miid}}">
              
             <td id="b" class="name">{{item.name}}</td>
             <td id="b2" class="price">{{item.price}}</td>
@@ -119,9 +142,9 @@ th{
               </button></td>
             {% endif %}
           {% elif item.kind == "drink" %}
-            <tr class="all drink" value={{item.miid}}>
+            <tr class="{{item['kind']}}" value={{item.miid}}>
             <td class="name">{{item.name}}</td>
-            <td class="price">$ {{item.price}}</td>
+            <td class="price">{{item.price}}</td>
             <td class="miid" value="{{item.miid}}">
                
               <input  miid ="{{item.miid}}" id="addCust" type="submit" value="Add to Cart!">
@@ -129,19 +152,19 @@ th{
             </td>  
             </tr>
           {% elif item.kind == "candy" %}
-            <tr class="all candy" value={{item.miid}}>
+            <tr class="{{item['kind']}}" value={{item.miid}}>
             
             <td class="name">{{item.name}}</td>
-            <td class="price">$ {{item.price}}</td>
+            <td class="price">{{item.price}}</td>
             <td class="miid" value="{{item.miid}}">
               <input  miid ="{{item.miid}}" id="addCust" type="submit" value="Add to Cart!">
               
             </td>
             </tr>
           {% elif item.kind == "snack" %}
-            <tr class="all snack" value={{item.miid}}>
+            <tr class="{{item['kind']}}" value={{item.miid}}>
             <td class="name">{{item.name}}</td>
-            <td class="price">$ {{item.price}}</td>
+            <td class="price">{{item.price}}</td>
             <td class="miid" value="{{item.miid}}">
               <!--<label for="addCust">Add To Cart!</label>-->
               <input miid ="{{item.miid}}" id="addCust" type="submit" value="Add to Cart!">
@@ -153,7 +176,7 @@ th{
         </table>
         </div>
        <br>
-      Total Price: <input type="text" name="subtotal" value="0" />
+      
       <br><button type="submit">Checkout!</button>
       </form>
     </div>
@@ -172,21 +195,28 @@ var extras = ["Null"];
   $("#extraList").on(
     "click", "input[type=submit]",
     function(event) {
-      var name = $(this).closest("tr").find("td.name").text()
-      var price = $(this).closest("tr").find("#sum").val()[0];
+      var name = $(this).closest("div").find("h1").text();
+      var price = $(this).closest("tr").find("#sum").val();
+      var miid = $(this).closest("#extraList").val();
+      var quantity = parseFloat($(this).closest("tr").find("#quantity").val());
       if ($(this)[0].checked===true){
         
         extras.push($(this).closest("tr").find("td.name").text());
       }
-      // var price = $(this).closest("tr").find(".price").text();
+      
       console.log(price);
       console.log(name);
-      var miid = $(this).closest("#extraList").val();
+     
       console.log(miid);
       $.post(URL,{'miid':miid, 'price':price, 'extras':extras, 'exclude':exclude},function(resp) { 
-                var name = resp.name;
-                var price = resp.price;
-               
+                var total = parseFloat($("input[name=subtotal]").val(),10);
+                quantity-=1;
+                total+=parseFloat(price,10);
+                $("input[name=subtotal]").val(total);
+                
+                var notify = $('<br><div>'+name+' Added to Cart!</div>').css({display:"block", top:"40px", padding: "10px", background: "skyblue", height:"40px",width: "250px"}).addClass("confirm");
+                $("#notice").prepend(notify);
+                $(".confirm").fadeOut(3000); 
             },
             'json');
       
@@ -197,15 +227,27 @@ var extras = ["Null"];
     function(event) {
       event.preventDefault();
       var miid = $(this).attr("miid");
+      var price = $(this).closest("tr").find(".price").text();
+      var name = $(this).closest("tr").find(".name").text();
       console.log(miid);
+      console.log(price);
+      var total = parseFloat($("input[name=subtotal]").val(),10);
+      console.log(total);
       $.post(URL,{'miid':miid},function(resp) { 
                 
+                total+=parseFloat(price,10);
+                $("input[name=subtotal]").val(total);
+                
+                var notify = $('<br><div>'+name+' Added to Cart!</div>').css({display:"block", top:"40px", padding: "10px", background: "skyblue", height:"40px",width: "250px", color: "black"}).addClass("confirm");
+                $("#notice").prepend(notify);
+                $(".confirm").fadeOut(3000); 
+                
+               
             },
             'json');
+            
       
     });
-    
-    // $("#menuItems").each("")
 
 /* Set the width of the side navigation to 250px and the left margin of the page content to 250px */
 function openNav(item,miid) {
@@ -267,7 +309,7 @@ function calcPrice(){
         total+=parseFloat($(this).closest("tr").find(".price").text(),10);
     });
     $("input[name=subtotal]").val(total)
-}
+  }
     $("#menuItems").on("click", "input[type=checkbox]", function(event){
       calcPrice();
     });
@@ -281,7 +323,6 @@ function calcPrice(){
       console.log(iprice);
       var oprice = parseFloat($("tr[value=" + miid +"]").find(".price").text());
 
-      
       console.log($(this)[0].checked);
       var nprice = oprice;
       if ($(this)[0].checked === true) {
@@ -322,16 +363,7 @@ function calcPrice(){
       $("input#sum").val(nprice);
       extras.push(name);
       console.log(extras);
-      
-      // $.post(URL,{'miid':miid, 'name':name, 'price':nprice, 'extra':true},function(resp) {
-      //   var iname = resp.iname;
-      //   var aname = resp.aname;
-      //   $('#notice').empty();
-      //   $('#notice').append('<p> Added '+iname+' with '+aname+' to cart!');
-      // });
-      
   });
-
 
 
 /* Set the width of the side navigation to 0 and the left margin of the page content to 0 */
@@ -340,20 +372,12 @@ function closeNav() {
   document.getElementById("main").style.marginLeft = "0";
 }
 
+
+
 function filterSelection(className){
-  var allClasses = ["sandwich", "drink", "candy", "snack", "all"];
-  var btnIDs = ["sandwich-btn", "drink-btn", "candy-btn", "snack-btn", "all-btn"];
-  console.log(className);
-  for(var i=0;i<allClasses.length;i++){
-    var currClass = allClasses[i]
-    var currBtn = btnIDs[i]
-    if (currClass != className){
-      $("."+currClass).hide();
-      $("#"+currBtn).attr("class", "btn");
-    }
-  }
-  $("."+className).show();
-  $("#"+className+"-btn").attr("class", "btn active");
+  $("tr."+className).siblings("tr:not(."+className+"):not(.title)").toggle();
 }
+
+
 </script>
 {% endblock %}
